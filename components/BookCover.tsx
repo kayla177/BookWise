@@ -7,7 +7,6 @@ type BookCoverVariant = "extraSmall" | "small" | "medium" | "regular" | "wide";
 
 // Maps the 'variant' prop to a corresponding CSS class.
 const variantStyles: Record<BookCoverVariant, string> = {
-  // extraSmall corresponds to the className "book-cover_extra_small"
   extraSmall: "book-cover_extra_small",
   small: "book-cover_small",
   medium: "book-cover_medium",
@@ -17,7 +16,7 @@ const variantStyles: Record<BookCoverVariant, string> = {
 
 interface BookCoverProps {
   className?: string;
-  variant: BookCoverVariant;
+  variant?: BookCoverVariant;
   coverColor: string;
   coverImage: string;
 }
