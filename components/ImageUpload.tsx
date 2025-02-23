@@ -2,12 +2,12 @@
 
 import { IKImage, ImageKitProvider, IKUpload, IKVideo } from "imagekitio-next";
 import config from "@/lib/config";
-import ImageKit from "imagekit";
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
+// destructuring to make it easier to access
 const {
   env: {
     imagekit: { publicKey, urlEndpoint },
@@ -51,6 +51,7 @@ const ImageUpload = ({
 }: {
   onFileChange: (filePath: string) => void;
 }) => {
+  // connect to IKUpload component
   const ikUploadRef = useRef(null);
   const [file, setFile] = useState<{ filePath: string } | null>(null);
 
@@ -76,6 +77,7 @@ const ImageUpload = ({
       urlEndpoint={urlEndpoint}
       authenticator={authenticator}
     >
+      {/* ref -- connect 'ikUploadRef' to the IKUpload component */}
       <IKUpload
         className="hidden"
         ref={ikUploadRef}
@@ -89,6 +91,8 @@ const ImageUpload = ({
         onClick={(e) => {
           e.preventDefault();
 
+          // if the reference is available, simulates a click on <IKUpload />
+          //   opening the file upload dialog programmatically
           if (ikUploadRef.current) {
             // @ts-expect-error
             ikUploadRef.current?.click();
