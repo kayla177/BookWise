@@ -25,6 +25,8 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { FIELD_NAMES, FIELD_TYPES } from "@/constants";
 import ImageUpload from "@/components/ImageUpload";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 // FieldValues ensures that T follows the correct structure for a form.
 // This makes AuthForm flexible and reusable for different forms.
@@ -42,6 +44,7 @@ const AuthForm = <T extends FieldValues>({
   defaultValues,
   onSubmit,
 }: AuthFormProps<T>) => {
+  const router = useRouter();
   const isSignIn = type === "SIGN_IN";
 
   // 1. Define your form.
@@ -56,9 +59,22 @@ const AuthForm = <T extends FieldValues>({
 
   // 2. Define a submit handler.
   const handleSubmit: SubmitHandler<T> = async (data) => {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(data);
+    const result = await onSubmit(data);
+    console.log(result);
+
+    if (result?.success) {
+      toast("Success", {
+        description: isSignIn
+          ? "You have successfully signed in."
+          : "You have successfully signed up.",
+      });
+
+      router.push("/");
+    } else {
+      toast(`Error ${isSignIn ? "Signing in" : "Signing up"}`, {
+        description: result?.error ?? "An error occurred.",
+      });
+    }
   };
 
   return (

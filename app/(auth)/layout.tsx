@@ -1,7 +1,13 @@
 import React, { ReactNode } from "react";
 import Image from "next/image";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
-const Layout = ({ children }: { children: ReactNode }) => {
+const Layout = async ({ children }: { children: ReactNode }) => {
+  const session = await auth();
+
+  if (session) redirect("/");
+
   return (
     <main className="auth-container">
       <section className="auth-form">
@@ -23,6 +29,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
           width={1000}
           height={1000}
           className="size-full object-cover"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
       </section>
     </main>
