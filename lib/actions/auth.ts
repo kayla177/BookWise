@@ -6,6 +6,9 @@ import { eq } from "drizzle-orm";
 import { signIn } from "@/auth";
 import { users } from "@/database/schema";
 import { hash } from "bcryptjs";
+import { headers } from "next/headers";
+import ratelimit from "@/lib/ratelimit";
+import { redirect } from "next/navigation";
 
 // since we only need to signIn not signUp, only need "email"  "password" type from AuthCredentials
 // use Pick to pick only some of the type that will apply
@@ -13,6 +16,15 @@ export const signInWithCredentials = async (
   params: Pick<AuthCredentials, "email" | "password">,
 ) => {
   const { email, password } = params;
+
+  // get the current ip address(rate limit)
+  const ip = (await headers()).get("x-forwarded-for") || "127.0.0.1";
+  // this success will let us know if we can go to that page successfully
+  const { success } = await ratelimit.limit(ip);
+
+  if (!success) {
+    return redirect("/too-fast");
+  }
 
   try {
     // means that we want to use the "credentials" method to signIn
@@ -36,6 +48,15 @@ export const signInWithCredentials = async (
 
 export const signUp = async (params: AuthCredentials) => {
   const { fullName, email, password, universityCard, universityId } = params;
+
+  // get the current ip address(rate limit)
+  const ip = (await headers()).get("x-forwarded-for") || "127.0.0.1";
+  // this success will let us know if we can go to that page successfully
+  const { success } = await ratelimit.limit(ip);
+
+  if (!success) {
+    return redirect("/too-fast");
+  }
 
   const existingUser = await db
     .select()
