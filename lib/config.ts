@@ -10,8 +10,11 @@ const config = {
     upstash: {
       redisUrl: process.env.UPSTASH_REDIS_URL!,
       redisToken: process.env.UPSTASH_REDIS_TOKEN!,
+      qstashUrl: process.env.QSTASH_URL!,
+      qstashToken: process.env.QSTASH_TOKEN!,
     },
   },
 };
+// add "!" to let it know that it'll always be there
 
 export default config;
