@@ -9,6 +9,8 @@ import { hash } from "bcryptjs";
 import { headers } from "next/headers";
 import ratelimit from "@/lib/ratelimit";
 import { redirect } from "next/navigation";
+import { workflowClient } from "@/lib/workflow";
+import config from "@/lib/config";
 
 // since we only need to signIn not signUp, only need "email"  "password" type from AuthCredentials
 // use Pick to pick only some of the type that will apply
@@ -79,6 +81,15 @@ export const signUp = async (params: AuthCredentials) => {
       universityId,
       password: hashedPassword,
       universityCard,
+    });
+
+    // trigger the workflow immediately after we create the user
+    await workflowClient.trigger({
+      url: `${config.env.prodApiEndpoint}/api/workflow/onboarding`,
+      body: {
+        email,
+        fullName,
+      },
     });
 
     //!!! automatically signIn for new user

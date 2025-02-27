@@ -50,8 +50,12 @@ const getUserState = async (email: string): Promise<UserState> => {
 export const { POST } = serve<InitialData>(async (context) => {
   const { email, fullName } = context.requestPayload;
 
+  console.log(`[WORKFLOW] New signup for: ${email}`);
+
   // 1. send an welcome email to new sign-up user
   await context.run("new-signup", async () => {
+    console.log(`[WORKFLOW] Sending welcome email to ${email}`);
+
     await sendEmail({
       email,
       subject: "Welcome to the platform",
@@ -61,6 +65,8 @@ export const { POST } = serve<InitialData>(async (context) => {
 
   // 2. To leave time for the user to interact with our platform,
   //    we use context.sleep to pause our workflow for 3 days
+  console.log(`[WORKFLOW] Sleeping for 3 days before engagement check`);
+
   await context.sleep("wait-for-3-days", 60 * 60 * 24 * 3);
 
   //  3. infinite loop to periodically (every month) check
