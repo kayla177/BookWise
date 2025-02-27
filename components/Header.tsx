@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 // NOTE:: As long as you use hook within your component, have to add "use client"
 import { cn, getInitials } from "@/lib/utils";
 import Image from "next/image";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Session } from "next-auth";
 
 const Header = ({ session }: { session: Session }) => {
