@@ -53,10 +53,13 @@ const FileUpload = ({
   folder,
   variant,
   onFileChange,
+  value,
 }: FileUploadProps) => {
   // connect to IKUpload component
   const ikUploadRef = useRef(null);
-  const [file, setFile] = useState<{ filePath: string } | null>(null);
+  const [file, setFile] = useState<{ filePath: string | null }>({
+    filePath: value ?? null,
+  });
   const [progress, setProgress] = useState(0);
 
   const styles = {
