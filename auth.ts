@@ -1,6 +1,6 @@
 import NextAuth, { User } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "@/database/drizzle";
 import { users } from "@/database/schema";
 import { eq } from "drizzle-orm";
@@ -14,7 +14,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     CredentialsProvider({
       async authorize(credentials) {
-        if (!credentials?.email || !credentials.password) {
+        if (!credentials?.email || !credentials?.password) {
           return null;
         }
 
@@ -25,9 +25,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           .where(eq(users.email, credentials.email.toString()))
           .limit(1);
 
-        if (user.length === 0) {
-          return null;
-        }
+        if (user.length === 0) return null;
 
         // "compare()" from bcryptjs checks if the provided password matches the hashed password
         const isPasswordValid = await compare(
@@ -35,9 +33,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           user[0].password,
         );
 
-        if (!isPasswordValid) {
-          return null;
-        }
+        if (!isPasswordValid) return null;
 
         // if login is successful, return user's info
         // this data is stored in the JWT session
@@ -63,14 +59,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.id = user.id;
         token.name = user.name;
       }
-      // return the modified token
+
       return token;
     },
-    async sessions({ session, token }) {
+    async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.name = token.name as string;
       }
+
+      // console.log("SESSION CALLBACK:", session);
 
       return session;
     },

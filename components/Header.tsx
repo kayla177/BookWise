@@ -12,7 +12,7 @@ import { Session } from "next-auth";
 const Header = ({ session }: { session: Session }) => {
   //   get the current path, inorder to control the color of the header choice
   const pathname = usePathname();
-  console.log(session);
+  // console.log(session);
 
   return (
     <header className="my-10 flex justify-between gap-5">
