@@ -1,5 +1,6 @@
 import React from "react";
 import BookCard from "@/components/BookCard";
+import book from "@/lib/admin/actions/book";
 
 interface BookListProps {
   title: string;
@@ -9,6 +10,10 @@ interface BookListProps {
 }
 
 const BookList = ({ title, books, containerClassName }: BookListProps) => {
+  if (books.length > 2) {
+    return;
+  }
+
   return (
     <section className={containerClassName}>
       <h2 className="font-bebas-neue text-4xl text-light-100">{title}</h2>

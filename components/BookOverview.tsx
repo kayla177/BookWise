@@ -2,18 +2,20 @@ import React from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import BookCover from "@/components/BookCover";
+import book from "@/lib/admin/actions/book";
 
 const BookOverview = ({
   title,
   author,
   genre,
   rating,
-  total_copies,
-  available_copies,
+  totalCopies,
+  availableCopies,
   description,
-  color,
-  cover,
+  coverColor,
+  coverUrl,
 }: Book) => {
+  // console.log(coverUrl);
   return (
     <section className="book-overview">
       {/*overview description*/}
@@ -38,11 +40,11 @@ const BookOverview = ({
 
         <div className="book-copies">
           <p>
-            Total Books: <span>{total_copies}</span>
+            Total Books: <span>{totalCopies}</span>
           </p>
 
           <p>
-            Available Books: <span>{available_copies}</span>
+            Available Books: <span>{availableCopies}</span>
           </p>
         </div>
 
@@ -60,8 +62,8 @@ const BookOverview = ({
           <BookCover
             variant="wide"
             className="z-10"
-            coverColor={color}
-            coverImage={cover}
+            coverColor={coverColor}
+            coverImage={coverUrl}
           />
 
           {/*hidden for small screen, no enough space*/}
@@ -69,8 +71,8 @@ const BookOverview = ({
             <BookCover
               variant="wide"
               className="z-10"
-              coverColor={color}
-              coverImage={cover}
+              coverColor={coverColor}
+              coverImage={coverUrl}
             />
           </div>
         </div>
