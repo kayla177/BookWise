@@ -25,7 +25,6 @@ const BookCard = ({
         <p className="book-genre">{genre}</p>
       </div>
 
-      {/*  if the book is loaned*/}
       {isLoanedBook && (
         <div className="mt-3 w-full">
           <div className="book-loaned">
@@ -35,7 +34,6 @@ const BookCard = ({
               width={18}
               height={18}
               className="object-contain"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
             <p className="text-light-100">11 days left to return</p>
           </div>
@@ -46,4 +44,5 @@ const BookCard = ({
     </Link>
   </li>
 );
+
 export default BookCard;

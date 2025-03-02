@@ -1,18 +1,15 @@
 import React from "react";
 import BookCard from "@/components/BookCard";
-import book from "@/lib/admin/actions/book";
 
-interface BookListProps {
+interface Props {
   title: string;
   // "Book" are defined in types.d.ts
   books: Book[];
-  containerClassName: string;
+  containerClassName?: string;
 }
 
-const BookList = ({ title, books, containerClassName }: BookListProps) => {
-  if (books.length > 2) {
-    return;
-  }
+const BookList = ({ title, books, containerClassName }: Props) => {
+  if (books.length < 2) return;
 
   return (
     <section className={containerClassName}>
