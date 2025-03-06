@@ -39,7 +39,7 @@ const RootLayout = async ({ children }: { children: ReactNode }) => {
           className={`${ibmPlexSans.className} ${bebasNeue.variable} antialiased`}
         >
           {children}
-          <Toaster />
+          <Toaster richColors position="top-center" />
         </body>
       </SessionProvider>
     </html>

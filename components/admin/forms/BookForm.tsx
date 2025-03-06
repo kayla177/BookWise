@@ -49,13 +49,13 @@ const BookForm = ({ type, ...book }: BookFormProps) => {
     const result = await createBook(values);
 
     if (result.success) {
-      toast("Success", {
+      toast.success("Success", {
         description: "Book created successfully",
       });
 
       router.push(`/admin/books/${result.data.id}`);
     } else {
-      toast("Error", {
+      toast.error("Error", {
         description: result.message,
       });
     }

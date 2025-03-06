@@ -63,7 +63,7 @@ const AuthForm = <T extends FieldValues>({
     console.log(result);
 
     if (result?.success) {
-      toast("Success", {
+      toast.success("Success", {
         description: isSignIn
           ? "You have successfully signed in."
           : "You have successfully signed up.",
@@ -71,7 +71,7 @@ const AuthForm = <T extends FieldValues>({
 
       router.push("/");
     } else {
-      toast(`Error ${isSignIn ? "Signing in" : "Signing up"}`, {
+      toast.error(`Error ${isSignIn ? "Signing in" : "Signing up"}`, {
         description: result?.error ?? "An error occurred.",
       });
     }
