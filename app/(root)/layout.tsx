@@ -15,7 +15,6 @@ const Layout = async ({ children }: { children: ReactNode }) => {
   }
 
   // after we check if the user are sign in
-  //
   after(async () => {
     // additional check if the user is logged in
     if (!session?.user?.id) return;
@@ -27,10 +26,24 @@ const Layout = async ({ children }: { children: ReactNode }) => {
       .where(eq(users.id, session?.user?.id))
       .limit(1);
 
-    if (user[0].lastActivityDate === new Date().toISOString().slice(0, 10)) {
-      // if the last activity date is today, don't record
+    // Safety check: Ensure user exists before accessing lastActivityDate
+    if (!user.length || !user[0]?.lastActivityDate) {
+      console.warn(
+        "User not found or missing lastActivityDate:",
+        session?.user?.id,
+      );
       return;
     }
+
+    // Extract last activity date
+    const lastActivityDate = user[0].lastActivityDate;
+    const today = new Date().toISOString().slice(0, 10);
+
+    // If the last activity date is already today, skip updating
+    if (lastActivityDate === today) {
+      return;
+    }
+
     // if the user is logged in, update the database
     // the slice(0,10) here is takes the day, month and year, we do not need the time here
     // eq() --> we only want to update the date for the user that is currently logged in
