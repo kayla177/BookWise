@@ -53,23 +53,50 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   // Modifies JWT token contents before storing it, when a user logs in, their ID and name are added to the token.
   // The token is used to authenticate API requests (instead of making a database call every time).
+  // callbacks: {
+  //   async jwt({ token, user }) {
+  //     if (user) {
+  //       token.id = user.id;
+  //       token.name = user.name;
+  //     }
+  //
+  //     return token;
+  //   },
+  //   async session({ session, token }) {
+  //     if (session.user) {
+  //       session.user.id = token.id as string;
+  //       session.user.name = token.name as string;
+  //     }
+  //
+  //     // console.log("SESSION CALLBACK:", session);
+  //
+  //     return session;
+  //   },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.name = user.name;
       }
-
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }): Promise<Session> {
       if (session.user) {
+        // Validate user still exists in DB
+        const dbUser = await db
+          .select()
+          .from(users)
+          .where(eq(users.id, token.id as string))
+          .limit(1);
+
+        if (dbUser.length === 0) {
+          console.warn("⚠️ User no longer exists. Returning an empty session.");
+          return { ...session, user: { id: "", name: "", email: "" } }; // Prevents type error
+        }
+
         session.user.id = token.id as string;
         session.user.name = token.name as string;
       }
-
-      // console.log("SESSION CALLBACK:", session);
-
       return session;
     },
   },
