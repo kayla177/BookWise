@@ -2,7 +2,7 @@
 
 import { books, borrowRecords } from "@/database/schema";
 import { db } from "@/database/drizzle";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import dayjs from "dayjs";
 
 export const borrowBook = async (params: BorrowBookParams) => {
@@ -15,6 +15,17 @@ export const borrowBook = async (params: BorrowBookParams) => {
       .where(eq(books.id, bookId))
       .limit(1);
 
+    const borrowedBook = await db
+      .select()
+      .from(borrowRecords)
+      .where(
+        and(eq(borrowRecords.bookId, bookId), eq(borrowRecords.userId, userId)),
+      )
+      .limit(1);
+
+    console.log("[BOOK ACTION]: borrowedBook result:", borrowedBook);
+
+    // borrowBook is array, make sure to use "borrowedBook.length" to check empty instead of just borrowBook
     if (!book.length || book[0].availableCopies <= 0) {
       return {
         success: false,
@@ -22,10 +33,19 @@ export const borrowBook = async (params: BorrowBookParams) => {
       };
     }
 
+    // need debug
+    if (borrowedBook.length > 0) {
+      console.log("[BOOK ACTION] User has already borrowed this book.");
+      return {
+        success: false,
+        error: "You already have borrowed this book",
+      };
+    }
+
     // add 7 days from today for borrowing the book
     const dueDate = dayjs().add(7, "day").toDate().toDateString();
 
-    const record = db.insert(borrowRecords).values({
+    const record = await db.insert(borrowRecords).values({
       userId,
       bookId,
       dueDate,
