@@ -4,12 +4,18 @@ import BookCard from "@/components/BookCard";
 interface Props {
   title: string;
   // "Book" are defined in types.d.ts
-  books: (Book | BorrowBook)[];
+  books: Book[];
   containerClassName?: string;
 }
 
 const BookList = ({ title, books, containerClassName }: Props) => {
-  if (books.length < 2) return;
+  // if (title === "Latest Books") {
+  //   if (books.length < 2) return;
+  // }
+
+  if (books.length === 0) {
+    return <h3 className="text-light-100 font-bold mt-10">No books found.</h3>;
+  }
 
   return (
     <section className={containerClassName}>
@@ -17,10 +23,7 @@ const BookList = ({ title, books, containerClassName }: Props) => {
 
       <ul className="book-list">
         {books.map((book) => {
-          // Check if book is a BorrowBook (has a book field)
-          const bookData = "book" in book ? book.book : book;
-
-          return <BookCard key={bookData.id} {...bookData} />;
+          return <BookCard key={book.id} {...book} />;
         })}
       </ul>
     </section>

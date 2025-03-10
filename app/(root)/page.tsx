@@ -24,7 +24,7 @@ const Home = async () => {
       {/* the first book is already showed in the bookOverview*/}
 
       <BookList
-        title="latest Books"
+        title="Latest Books"
         books={latestBooks.slice(1)}
         containerClassName="mt-28"
       />

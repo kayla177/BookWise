@@ -9,7 +9,7 @@ import { eq } from "drizzle-orm";
 
 const Layout = async ({ children }: { children: ReactNode }) => {
   const session = await auth();
-  console.log("[root/layout.tsx]Session Query Result:", session);
+  // console.log("[root/layout.tsx]Session Query Result:", session);
 
   if (!session) {
     redirect("/sign-in");
