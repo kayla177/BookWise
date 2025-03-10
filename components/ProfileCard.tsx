@@ -20,6 +20,7 @@ interface ProfileCardProps {
 }
 
 const ProfileCard = ({ user, session }: ProfileCardProps) => {
+  console.log(user.universityCard);
   return (
     <ImageKitProvider
       publicKey={config.env.imagekit.publicKey}
