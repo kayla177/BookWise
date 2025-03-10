@@ -1,18 +1,25 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { signOut } from "@/auth";
-import BookList from "@/components/BookList";
-import { books, borrowRecords } from "@/database/schema";
+import { auth, signOut } from "@/auth";
+import { books, borrowRecords, users } from "@/database/schema";
 import { db } from "@/database/drizzle";
 import { desc, eq } from "drizzle-orm";
-import { late } from "zod";
+import BorrowBookList from "@/components/BorrowBookList";
+import ProfileCard from "@/components/ProfileCard";
 
 const Page = async () => {
-  // const latestBooks = await db
-  //   .select()
-  //   .from(borrowRecords)
-  //   .limit(10)
-  //   .orderBy(desc(borrowRecords.borrowDate));
+  const session = await auth();
+  const user = await db
+    .select({
+      id: users.id,
+      fullName: users.fullName,
+      email: users.email,
+      universityId: users.universityId,
+      universityCard: users.universityCard,
+    })
+    .from(users)
+    .where(eq(users.id, session?.user?.id))
+    .limit(1);
 
   const latestBooks = await db
     .select({
@@ -48,32 +55,40 @@ const Page = async () => {
     .orderBy(desc(borrowRecords.borrowDate));
 
   console.log("[MY-PROFILE] Latest Books: ", latestBooks);
+  console.log("[MY-PROFILE] user: ", user[0]);
 
   return (
     <>
-      <form
-        action={async () => {
-          "use server";
-          await signOut();
-        }}
-        className="mb-10"
-      >
-        <Button>Logout</Button>
-      </form>
-
-      {latestBooks.length === 0 ? (
-        <div className="mt-20 w-full text-center">
-          <h3 className="text-2xl font-semibold text-light-100">
-            No Borrow Record Found
-          </h3>
+      <div className="flex flex-col md:flex-row gap-10">
+        {/* Profile Card Section */}
+        <div className="md:w-1/3">
+          <ProfileCard user={user[0]} session={session} />
+          <form
+            action={async () => {
+              "use server";
+              await signOut();
+            }}
+            className="mt-4"
+          >
+            <Button className="w-full bg-light-500 hover:bg-rose-600">
+              Logout
+            </Button>
+          </form>
         </div>
-      ) : (
-        <BookList
-          title="Borrowed Books"
-          books={latestBooks.map((b) => b.book)}
-          containerClassName="mt-28"
-        />
-      )}
+
+        {/* Borrowed Books Section */}
+        <div className="md:w-2/3">
+          {latestBooks.length === 0 ? (
+            <div className="mt-20 w-full text-center">
+              <h3 className="text-2xl font-semibold text-light-100">
+                No Borrow Record Found
+              </h3>
+            </div>
+          ) : (
+            <BorrowBookList books={latestBooks} />
+          )}
+        </div>
+      </div>
     </>
   );
 };
