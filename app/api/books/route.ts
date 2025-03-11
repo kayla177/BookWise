@@ -44,7 +44,7 @@ export async function GET(req: Request) {
           genre: books.genre,
           createdAt: books.createdAt,
           coverUrl: books.coverUrl,
-          coverColor: books.coverColor, // ✅ Ensure this is fetched
+          coverColor: books.coverColor,
         })
         .from(books)
         .where(ilike(books.title, `%${query}%`)) // Case-insensitive search
@@ -60,7 +60,7 @@ export async function GET(req: Request) {
           genre: books.genre,
           createdAt: books.createdAt,
           coverUrl: books.coverUrl,
-          coverColor: books.coverColor, // ✅ Make sure this is also included
+          coverColor: books.coverColor,
         })
         .from(books)
         .orderBy(desc(books.createdAt))

@@ -1,18 +1,34 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import BookCard from "@/components/admin/BookCard";
+import { toast } from "sonner";
 
 const BookList = () => {
   const [books, setBooks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const res = await fetch("/api/books");
+        const res = await fetch(`/api/books?page=${page}&limit=10`);
         const data = await res.json();
-        setBooks(data);
+
+        if (data.length === 0) {
+          setHasMore(false);
+          return;
+        }
+
+        // Ensure no duplicates are added
+        setBooks((prevBooks) => {
+          const newBooks = data.filter(
+            (newBook) => !prevBooks.some((b) => b.id === newBook.id),
+          );
+          return [...prevBooks, ...newBooks];
+        });
       } catch (error) {
         console.error("Error fetching books:", error);
       } finally {
@@ -21,19 +37,43 @@ const BookList = () => {
     };
 
     fetchBooks();
-  }, []);
+  }, [page]);
 
-  const handleDelete = async (id: string) => {
+  // console.log(
+  //   "Book IDs:",
+  //   books.map((b) => b.id),
+  // );
+
+  const handleDelete = useCallback(async (id: string) => {
     try {
-      await fetch(`/api/books/${id}`, { method: "DELETE" });
+      const confirmDelete = confirm(
+        "Are you sure you want to delete this book?",
+      );
+      if (!confirmDelete) return;
+
+      const res = await fetch(`/api/books/${id}`, { method: "DELETE" });
+      const result = await res.json();
+
+      if (!res.ok) throw new Error(result.error || "Failed to delete book");
+
       setBooks((prevBooks) => prevBooks.filter((book) => book.id !== id));
+      toast.success("Book deleted successfully!");
     } catch (error) {
       console.error("Failed to delete book:", error);
+      toast.error("Error deleting book", { description: error.message });
     }
-  };
+  }, []);
 
   if (loading) {
     return <p className="text-dark-600 text-center mt-10">Loading books...</p>;
+  }
+
+  if (books.length === 0) {
+    return (
+      <div className="text-center text-dark-600 mt-10">
+        <p>No books found. 📚</p>
+      </div>
+    );
   }
 
   return (

@@ -32,32 +32,64 @@ const BookForm = ({ type, ...book }: BookFormProps) => {
   const form = useForm<z.infer<typeof bookSchema>>({
     resolver: zodResolver(bookSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      author: "",
-      genre: "",
-      rating: 1,
-      totalCopies: 1,
-      coverUrl: "",
-      coverColor: "",
-      videoUrl: "",
-      summary: "",
+      title: book?.title || "",
+      description: book?.description || "",
+      author: book?.author || "",
+      genre: book?.genre || "",
+      rating: book?.rating || 1,
+      totalCopies: book?.totalCopies || 1,
+      coverUrl: book?.coverUrl || "",
+      coverColor: book?.coverColor || "",
+      videoUrl: book?.videoUrl || "",
+      summary: book?.summary || "",
     },
   });
 
+  // const onSubmit = async (values: z.infer<typeof bookSchema>) => {
+  //   const result = await createBook(values);
+  //
+  //   if (result.success) {
+  //     toast.success("Success", {
+  //       description: "Book created successfully",
+  //     });
+  //
+  //     router.push(`/admin/books/${result.data.id}`);
+  //   } else {
+  //     toast.error("Error", {
+  //       description: result.message,
+  //     });
+  //   }
+  // };
+
   const onSubmit = async (values: z.infer<typeof bookSchema>) => {
-    const result = await createBook(values);
-
-    if (result.success) {
-      toast.success("Success", {
-        description: "Book created successfully",
+    if (type === "update") {
+      const response = await fetch(`/api/books/${book.id}`, {
+        method: "PATCH",
+        body: JSON.stringify(values),
+        headers: { "Content-Type": "application/json" },
       });
 
-      router.push(`/admin/books/${result.data.id}`);
+      const result = await response.json();
+
+      if (response.ok) {
+        toast.success("Book updated successfully!");
+        router.push(`/admin/books/${book.id}`);
+      } else {
+        toast.error("Update failed", { description: result.error });
+      }
     } else {
-      toast.error("Error", {
-        description: result.message,
-      });
+      const result = await createBook(values);
+
+      if (result.success) {
+        toast.success("Success", {
+          description: "Book created successfully",
+        });
+        router.push(`/admin/books/${result.data.id}`);
+      } else {
+        toast.error("Error", {
+          description: result.message,
+        });
+      }
     }
   };
 
