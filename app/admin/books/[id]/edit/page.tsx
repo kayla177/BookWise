@@ -29,8 +29,12 @@ const EditBookPage = () => {
 
       setBook(data);
     } catch (error) {
-      if (error.name !== "AbortError") {
-        console.error("Error fetching book details:", error);
+      if (error instanceof Error) {
+        if (error.name !== "AbortError") {
+          console.error("Error fetching book details:", error);
+        }
+      } else {
+        console.error("An unknown error occurred:", error);
       }
     } finally {
       setLoading(false);
@@ -47,7 +51,7 @@ const EditBookPage = () => {
     );
   }
 
-  if (!book) {
+  if (!loading && !book) {
     return <p className="text-center mt-10 text-red-500">Book not found.</p>;
   }
 

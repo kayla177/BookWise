@@ -36,10 +36,14 @@ const BookDetail = () => {
 
       const data: Book = await res.json();
       setBook(data);
-    } catch (error: any) {
-      if (error.name !== "AbortError") {
-        console.error("Error fetching book details:", error);
-        setError(error.message || "Failed to fetch book");
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.name !== "AbortError") {
+          console.error("Error fetching book details:", error);
+          setError(error.message || "Failed to fetch book");
+        }
+      } else {
+        console.error("An unknown error occurred:", error);
       }
     } finally {
       setLoading(false);
@@ -62,7 +66,7 @@ const BookDetail = () => {
     return <p className="text-center mt-10 text-red-500">{error}</p>;
   }
 
-  if (!book) {
+  if (!loading && !book) {
     return <p className="text-center mt-10 text-red-500">Book not found.</p>;
   }
 
@@ -85,7 +89,7 @@ const BookDetail = () => {
         <div className="flex gap-8">
           {/* Book Cover */}
           <div className="w-48 h-64 bg-light-700 rounded-md p-2">
-            {book.coverUrl ? (
+            {book?.coverUrl ? (
               <IKImage
                 path={book.coverUrl}
                 alt={book.title}
@@ -113,12 +117,12 @@ const BookDetail = () => {
                 : "N/A"}
             </p>
             <h1 className="mt-3 text-2xl font-bold text-dark-600">
-              {book.title}
+              {book?.title}
             </h1>
             <p className="mt-1 text-md text-dark-700 font-semibold">
-              By {book.author}
+              By {book?.author}
             </p>
-            <p className="mt-1.5 text-sm text-gray-500">{book.genre}</p>
+            <p className="mt-1.5 text-sm text-gray-500">{book?.genre}</p>
 
             {/* Edit Button (if admin) */}
             <Link href={`/admin/books/${params.id}/edit`}>
@@ -135,7 +139,7 @@ const BookDetail = () => {
           {/* Summary */}
           <div>
             <h2 className="text-lg font-bold mb-2">Summary</h2>
-            {book.summary ? (
+            {book?.summary ? (
               book.summary.split("\n").map((line, i) => (
                 <p key={i} className="text-dark-700 mt-2.5">
                   {line}
@@ -149,7 +153,7 @@ const BookDetail = () => {
           {/* Video */}
           <div>
             <h2 className="text-lg font-bold mb-2">Video</h2>
-            {book.videoUrl ? (
+            {book?.videoUrl ? (
               <IKVideo
                 className="mt-2 rounded-lg w-full"
                 controls={true}

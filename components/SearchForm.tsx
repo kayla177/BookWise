@@ -12,7 +12,7 @@ const SearchForm = ({
 }: {
   query: string;
   setQuery: (query: string) => void;
-  setSearchResults: (results: any[]) => void;
+  setSearchResults: (results: Book[]) => void;
 }) => {
   const [search, setSearch] = useState(query);
 
@@ -34,7 +34,7 @@ const SearchForm = ({
 
   // Debounce function to limit API calls
   const debouncedFetch = useCallback(
-    debounce((query) => fetchSearchResults(query), 300), // 300ms delay
+    debounce((query: string) => fetchSearchResults(query), 300), // 300ms delay
     [],
   );
 

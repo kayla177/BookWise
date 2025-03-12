@@ -15,7 +15,7 @@ const BookList = () => {
     const fetchBooks = async () => {
       try {
         const res = await fetch(`/api/books?page=${page}&limit=10`);
-        const data = await res.json();
+        const data: Book[] = await res.json();
 
         if (data.length === 0) {
           setHasMore(false);
