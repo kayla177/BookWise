@@ -10,17 +10,6 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 
-interface Book {
-  id: string;
-  title: string;
-  author: string;
-  genre: string;
-  createdAt: string;
-  coverUrl?: string; // Make optional to prevent runtime errors
-  videoUrl?: string;
-  summary?: string;
-}
-
 const BookDetail = () => {
   const router = useRouter();
   const params = useParams();
@@ -119,7 +108,9 @@ const BookDetail = () => {
                 width={16}
                 height={16}
               />
-              {new Date(book.createdAt).toLocaleDateString()}
+              {book?.createdAt
+                ? new Date(book.createdAt).toLocaleDateString()
+                : "N/A"}
             </p>
             <h1 className="mt-3 text-2xl font-bold text-dark-600">
               {book.title}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import BookForm from "@/components/admin/forms/BookForm";
@@ -8,34 +8,38 @@ import BookForm from "@/components/admin/forms/BookForm";
 const EditBookPage = () => {
   const params = useParams();
   const router = useRouter();
-  const [book, setBook] = useState<any>(null);
+  const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchBookDetails = useCallback(async () => {
     if (!params.id) return;
 
     const abortController = new AbortController();
+    setLoading(true);
 
-    const fetchBookDetails = async () => {
-      try {
-        const res = await fetch(`/api/books/${params.id}`, {
-          signal: abortController.signal, // ✅ Allow canceling the request
-        });
-        const data = await res.json();
-        setBook(data);
-      } catch (error) {
-        if (error.name !== "AbortError") {
-          console.error("Error fetching book details:", error);
-        }
-      } finally {
-        setLoading(false);
+    try {
+      const res = await fetch(`/api/books/${params.id}`, {
+        signal: abortController.signal, // ✅ Allow canceling the request
+      });
+      const data = await res.json();
+
+      if (data.createdAt) {
+        data.createdAt = new Date(data.createdAt);
       }
-    };
 
-    fetchBookDetails();
-
+      setBook(data);
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        console.error("Error fetching book details:", error);
+      }
+    } finally {
+      setLoading(false);
+    }
     return () => abortController.abort(); // ✅ Cleanup on unmount or re-fetch
   }, [params.id]);
+  useEffect(() => {
+    fetchBookDetails();
+  }, [fetchBookDetails]);
 
   if (loading) {
     return (
@@ -60,5 +64,4 @@ const EditBookPage = () => {
     </>
   );
 };
-
 export default EditBookPage;

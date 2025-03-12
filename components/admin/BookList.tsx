@@ -5,7 +5,7 @@ import BookCard from "@/components/admin/BookCard";
 import { toast } from "sonner";
 
 const BookList = () => {
-  const [books, setBooks] = useState<any[]>([]);
+  const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [page, setPage] = useState(1);

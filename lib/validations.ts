@@ -21,6 +21,7 @@ export const bookSchema = z.object({
   rating: z.coerce.number().min(1).max(5),
   // coerce-> want to turn it into a number
   totalCopies: z.coerce.number().int().positive().lte(10000),
+  availableCopies: z.coerce.number().int().positive().lte(10000),
   coverUrl: z.string().nonempty(),
   coverColor: z
     .string()

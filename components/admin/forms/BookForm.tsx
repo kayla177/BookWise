@@ -38,28 +38,13 @@ const BookForm = ({ type, ...book }: BookFormProps) => {
       genre: book?.genre || "",
       rating: book?.rating || 1,
       totalCopies: book?.totalCopies || 1,
+      availableCopies: book?.availableCopies || 0,
       coverUrl: book?.coverUrl || "",
       coverColor: book?.coverColor || "",
       videoUrl: book?.videoUrl || "",
       summary: book?.summary || "",
     },
   });
-
-  // const onSubmit = async (values: z.infer<typeof bookSchema>) => {
-  //   const result = await createBook(values);
-  //
-  //   if (result.success) {
-  //     toast.success("Success", {
-  //       description: "Book created successfully",
-  //     });
-  //
-  //     router.push(`/admin/books/${result.data.id}`);
-  //   } else {
-  //     toast.error("Error", {
-  //       description: result.message,
-  //     });
-  //   }
-  // };
 
   const onSubmit = async (values: z.infer<typeof bookSchema>) => {
     if (type === "update") {
@@ -196,6 +181,29 @@ const BookForm = ({ type, ...book }: BookFormProps) => {
                   min={1}
                   max={10000}
                   placeholder="Total copies"
+                  {...field}
+                  className="book-form_input"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name={"availableCopies"}
+          render={({ field }) => (
+            <FormItem className="flex flex-col gap-1">
+              <FormLabel className="text-base font-normal text-dark-500">
+                Available Copies
+              </FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  min={1}
+                  max={10000}
+                  placeholder="Available copies"
                   {...field}
                   className="book-form_input"
                 />
