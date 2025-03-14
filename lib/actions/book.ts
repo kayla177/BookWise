@@ -23,7 +23,7 @@ export const borrowBook = async (params: BorrowBookParams) => {
       )
       .limit(1);
 
-    console.log("[BOOK ACTION]: borrowedBook result:", borrowedBook);
+    // console.log("[BOOK ACTION]: borrowedBook result:", borrowedBook);
 
     // borrowBook is array, make sure to use "borrowedBook.length" to check empty instead of just borrowBook
     if (!book.length || book[0].availableCopies <= 0) {
@@ -33,13 +33,12 @@ export const borrowBook = async (params: BorrowBookParams) => {
       };
     }
 
+    // console.log("[BOOK ACTION]: borrowedBook length:", borrowedBook.length);
+
     // need debug
     if (borrowedBook.length > 0) {
-      console.log("[BOOK ACTION] User has already borrowed this book.");
-      return {
-        success: false,
-        error: "You already have borrowed this book",
-      };
+      console.warn("[WARN] User has already borrowed this book.");
+      return { success: false, error: "You already have borrowed this book" };
     }
 
     // add 7 days from today for borrowing the book
