@@ -5,13 +5,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { adminSideBarLinks } from "@/constants";
 import { cn, getInitials } from "@/lib/utils";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Session } from "next-auth";
 
 const Sidebar = ({ session }: { session: Session }) => {
   // use browser functionalities --> "use client"
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <div className="admin-sidebar">
@@ -70,6 +71,26 @@ const Sidebar = ({ session }: { session: Session }) => {
           <p className="font-semibold text-dark-200">{session?.user?.name}</p>
           <p className="text-xs text-light-500">{session?.user?.email}</p>
         </div>
+
+        {/*<Link*/}
+        {/*  href="/"*/}
+        {/*  className="p-2 rounded-full hover:bg-gray-200 transition"*/}
+        {/*>*/}
+        {/*  <Image*/}
+        {/*    src="/icons/logout.svg"*/}
+        {/*    alt="exit to home page"*/}
+        {/*    width={20}*/}
+        {/*    height={20}*/}
+        {/*    className="justify-center items-center"*/}
+        {/*  />*/}
+        {/*</Link>*/}
+
+        <button
+          onClick={() => router.push("/")}
+          className="p-2 rounded-full hover:bg-gray-200 transition"
+        >
+          <Image src="/icons/logout.svg" alt="Logout" width={20} height={20} />
+        </button>
       </div>
     </div>
   );

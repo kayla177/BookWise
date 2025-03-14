@@ -29,6 +29,7 @@ const BorrowBook = ({
       toast.error("Error", {
         description: message,
       });
+      return;
     }
 
     setBorrowing(true);
@@ -36,6 +37,7 @@ const BorrowBook = ({
     try {
       // await for server action
       const result = await borrowBook({ bookId, userId });
+      // console.log("[BORROWBOOK] Borrow API Response:", result);
 
       if (result.success) {
         toast.success("Success", {
@@ -45,12 +47,13 @@ const BorrowBook = ({
         router.push("/my-profile");
       } else {
         toast.error("Error", {
-          description: "An error occurred while borrowing the book",
+          description: result.error,
         });
       }
     } catch (error) {
+      console.error("Borrowing failed: ", error);
       toast.error("Error", {
-        description: "An error occurred while borrowing the book",
+        description: "An unexpected error occurred while borrowing the book",
       });
     } finally {
       setBorrowing(false);

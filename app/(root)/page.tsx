@@ -1,8 +1,7 @@
 import BookOverview from "@/components/BookOverview";
 import BookList from "@/components/BookList";
-import { sampleBooks } from "@/constants";
 import { db } from "@/database/drizzle";
-import { books, users } from "@/database/schema";
+import { books } from "@/database/schema";
 import { auth } from "@/auth";
 import { desc } from "drizzle-orm";
 
@@ -25,7 +24,7 @@ const Home = async () => {
       {/* the first book is already showed in the bookOverview*/}
 
       <BookList
-        title="latest Books"
+        title="Latest Books"
         books={latestBooks.slice(1)}
         containerClassName="mt-28"
       />

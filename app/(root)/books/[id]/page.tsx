@@ -22,7 +22,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
     redirect("/404");
   }
 
-  console.log("[BOOKDETAIL]", bookDetails);
+  // console.log("[BOOKDETAIL]", bookDetails);
 
   return (
     <>
@@ -46,6 +46,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
           </section>
         </div>
 
+        {/*TODO*/}
         {/*  simliar books*/}
       </div>
     </>
