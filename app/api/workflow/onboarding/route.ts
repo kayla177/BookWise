@@ -99,16 +99,16 @@
 //   }
 // });
 //
+
 import { serve } from "@upstash/workflow/nextjs";
 import { db } from "@/database/drizzle";
 import { eq } from "drizzle-orm";
 import { users } from "@/database/schema";
 import { sendEmail } from "@/lib/workflow";
-import { renderWelcomeEmail } from "@/components/emails/welcomeEmail";
-import { renderReminderEmail } from "@/components/emails/reminderEmail";
-import { renderWelcomeBackEmail } from "@/components/emails/welcomeBackEmail";
-
-// // from https://upstash.com/docs/workflow/examples/customerOnboarding
+import { renderWelcomeEmail } from "@/components/emails/WelcomeEmail";
+import { renderWelcomeBackEmail } from "@/components/emails/WelcomeBackEmail";
+import { renderAccountApprovalEmail } from "@/components/emails/AccountApprovalEmail";
+import { renderCheckInReminderEmail } from "@/components/emails/CheckInReminderEmail";
 
 type UserState = "non-active" | "active";
 
@@ -157,7 +157,7 @@ export const { POST } = serve<InitialData>(async (context) => {
 
     await sendEmail({
       email,
-      subject: "Welcome to the University Library",
+      subject: "Welcome to BookWise Library",
       html: renderWelcomeEmail(fullName),
     });
   });
@@ -179,7 +179,7 @@ export const { POST } = serve<InitialData>(async (context) => {
       await context.run("send-email-non-active", async () => {
         await sendEmail({
           email,
-          subject: "Are you still there?",
+          subject: "We miss you at BookWise!",
           html: renderReminderEmail(fullName),
         });
       });
@@ -187,7 +187,7 @@ export const { POST } = serve<InitialData>(async (context) => {
       await context.run("send-email-active", async () => {
         await sendEmail({
           email,
-          subject: "Welcome back!",
+          subject: "Welcome back to BookWise!",
           html: renderWelcomeBackEmail(fullName),
         });
       });

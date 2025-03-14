@@ -1,62 +1,59 @@
-// components/emails/DueReminderEmail.tsx
+// components/emails/ReturnConfirmationEmail.tsx
 import * as React from "react";
 import { Text, Button, Link } from "@react-email/components";
 import EmailLayout from "./EmailLayout";
 
-interface DueReminderEmailProps {
+interface ReturnConfirmationEmailProps {
   fullName: string;
   bookTitle: string;
-  dueDate: string;
 }
 
-export const DueReminderEmail = ({
+export const ReturnConfirmationEmail = ({
   fullName,
   bookTitle,
-  dueDate,
-}: DueReminderEmailProps) => {
+}: ReturnConfirmationEmailProps) => {
   return (
     <EmailLayout
-      title={`Reminder: ${bookTitle} is Due Soon!`}
-      previewText={`Your borrowed book ${bookTitle} is due on ${dueDate}`}
+      title={`Thank You for Returning ${bookTitle}!`}
+      previewText={`Your return of ${bookTitle} has been confirmed`}
     >
       <Text className="text-light-100 mb-4">Hi {fullName},</Text>
 
       <Text className="text-light-100 mb-4">
-        Just a reminder that <strong>{bookTitle}</strong> is due for return on{" "}
-        <strong>{dueDate}</strong>. Kindly return it on time to avoid late fees.
+        We've successfully received your return of <strong>{bookTitle}</strong>.
+        Thank you for returning it on time.
       </Text>
 
       <Text className="text-light-100 mb-6">
-        If you're still reading, you can renew the book in your account.
+        Looking for your next read? Browse our collection and borrow your next
+        favorite book!
       </Text>
 
       <Button
-        href="https://bookwise.yourdomain.com/my-profile"
+        href="https://bookwise.yourdomain.com/library"
         className="bg-primary text-dark-100 px-6 py-3 rounded-md font-semibold text-center"
       >
-        Renew Book Now
+        Explore New Books
       </Button>
 
-      <Text className="text-light-100 mt-6">Keep reading,</Text>
+      <Text className="text-light-100 mt-6">Happy exploring,</Text>
     </EmailLayout>
   );
 };
 
-export default DueReminderEmail;
+export default ReturnConfirmationEmail;
 
 // Function to render the email as HTML string for sending via Resend
-export function renderDueReminderEmail(params: {
+export function renderReturnConfirmationEmail(params: {
   fullName: string;
   bookTitle: string;
-  dueDate: string;
 }): string {
   const { render } = require("@react-email/render");
 
   return render(
-    <DueReminderEmail
+    <ReturnConfirmationEmail
       fullName={params.fullName}
       bookTitle={params.bookTitle}
-      dueDate={params.dueDate}
     />,
   );
 }

@@ -78,7 +78,7 @@ import { db } from "@/database/drizzle";
 import { and, eq } from "drizzle-orm";
 import dayjs from "dayjs";
 import { sendEmail } from "@/lib/workflow";
-import { renderBookBorrowedEmail } from "@/components/emails/bookBorrowedEmail";
+import { renderBookBorrowedEmail } from "@/components/emails/BookBorrowedEmail";
 
 export const borrowBook = async (params: BorrowBookParams) => {
   const { userId, bookId } = params;
