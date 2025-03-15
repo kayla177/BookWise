@@ -1,6 +1,5 @@
-// components/emails/WelcomeEmail.tsx
 import * as React from "react";
-import { Text, Button, Link } from "@react-email/components";
+import { Text, Button } from "@react-email/components";
 import EmailLayout from "./EmailLayout";
 
 interface WelcomeEmailProps {
@@ -13,21 +12,31 @@ export const WelcomeEmail = ({ fullName }: WelcomeEmailProps) => {
       title="Welcome to BookWise, Your Reading Companion!"
       previewText="Welcome to BookWise - Your university library awaits"
     >
-      <Text className="text-light-100 mb-4">Hi {fullName},</Text>
+      <Text style={{ color: "#f8fafc", marginBottom: "16px" }}>
+        Hi {fullName},
+      </Text>
 
-      <Text className="text-light-100 mb-4">
+      <Text style={{ color: "#f8fafc", marginBottom: "16px" }}>
         Welcome to BookWise! We're excited to have you join our community of
         book enthusiasts. Explore a wide range of books, borrow with ease, and
         manage your reading journey seamlessly.
       </Text>
 
-      <Text className="text-light-100 mb-6">
+      <Text style={{ color: "#f8fafc", marginBottom: "24px" }}>
         Get started by logging in to your account:
       </Text>
 
       <Button
         href="https://bookwise.yourdomain.com/login"
-        className="bg-primary text-dark-100 px-6 py-3 rounded-md font-semibold text-center"
+        style={{
+          backgroundColor: "#E7C9A5",
+          color: "#1e293b",
+          padding: "12px 24px",
+          textDecoration: "none",
+          borderRadius: "4px",
+          fontWeight: "bold",
+          textAlign: "center",
+        }}
       >
         Login to BookWise
       </Button>
@@ -37,9 +46,8 @@ export const WelcomeEmail = ({ fullName }: WelcomeEmailProps) => {
 
 export default WelcomeEmail;
 
-// Function to render the email as HTML string for sending via Resend
-export function renderWelcomeEmail(fullName: string): string {
-  // Import the render function directly in this function to prevent server-side issues
-  const { render } = require("@react-email/render");
+import { render } from "@react-email/render";
+
+export async function renderWelcomeEmail(fullName: string): Promise<string> {
   return render(<WelcomeEmail fullName={fullName} />);
 }

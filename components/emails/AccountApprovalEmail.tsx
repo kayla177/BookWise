@@ -1,6 +1,5 @@
-// components/emails/AccountApprovalEmail.tsx
 import * as React from "react";
-import { Text, Button, Link } from "@react-email/components";
+import { Text, Button } from "@react-email/components";
 import EmailLayout from "./EmailLayout";
 
 interface AccountApprovalEmailProps {
@@ -15,33 +14,48 @@ export const AccountApprovalEmail = ({
       title="Your BookWise Account Has Been Approved!"
       previewText="Good news! Your BookWise library account is now approved"
     >
-      <Text className="text-light-100 mb-4">Hi {fullName},</Text>
+      <Text style={{ color: "#f8fafc", marginBottom: "16px" }}>
+        Hi {fullName},
+      </Text>
 
-      <Text className="text-light-100 mb-4">
+      <Text style={{ color: "#f8fafc", marginBottom: "16px" }}>
         Congratulations! Your BookWise account has been approved. You can now
         browse our library, borrow books, and enjoy all the features of your new
         account.
       </Text>
 
-      <Text className="text-light-100 mb-6">Log in to get started:</Text>
+      <Text style={{ color: "#f8fafc", marginBottom: "24px" }}>
+        Log in to get started:
+      </Text>
 
       <Button
         href="https://bookwise.yourdomain.com/login"
-        className="bg-primary text-dark-100 px-6 py-3 rounded-md font-semibold text-center"
+        style={{
+          backgroundColor: "#E7C9A5",
+          color: "#1e293b",
+          padding: "12px 24px",
+          textDecoration: "none",
+          borderRadius: "4px",
+          fontWeight: "bold",
+          textAlign: "center",
+        }}
       >
         Log in to BookWise
       </Button>
 
-      <Text className="text-light-100 mt-6">Welcome aboard,</Text>
+      <Text style={{ color: "#f8fafc", marginTop: "16px" }}>
+        Welcome aboard,
+      </Text>
     </EmailLayout>
   );
 };
 
 export default AccountApprovalEmail;
 
-// Function to render the email as HTML string for sending via Resend
-export function renderAccountApprovalEmail(fullName: string): string {
-  // Import the render function directly in this function to prevent server-side issues
-  const { render } = require("@react-email/render");
+import { render } from "@react-email/render";
+
+export async function renderAccountApprovalEmail(
+  fullName: string,
+): Promise<string> {
   return render(<AccountApprovalEmail fullName={fullName} />);
 }

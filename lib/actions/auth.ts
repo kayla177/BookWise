@@ -12,6 +12,10 @@ import { redirect } from "next/navigation";
 import { workflowClient } from "@/lib/workflow";
 import config from "@/lib/config";
 
+import { sendEmail } from "@/lib/workflow";
+import { renderWelcomeEmail } from "@/components/emails/WelcomeEmail";
+import { renderAccountApprovalEmail } from "@/components/emails/AccountApprovalEmail";
+
 // since we only need to signIn not signUp, only need "email"  "password" type from AuthCredentials
 // use Pick to pick only some of the type that will apply
 export const signInWithCredentials = async (
@@ -48,17 +52,64 @@ export const signInWithCredentials = async (
   }
 };
 
+// export const signUp = async (params: AuthCredentials) => {
+//   const { fullName, email, password, universityCard, universityId } = params;
+//
+//   // get the current ip address(rate limit)
+//   const ip = (await headers()).get("x-forwarded-for") || "127.0.0.1";
+//   // this success will let us know if we can go to that page successfully
+//   const { success } = await ratelimit.limit(ip);
+//
+//   if (!success) {
+//     return redirect("/too-fast");
+//   }
+//
+//   const existingUser = await db
+//     .select()
+//     .from(users)
+//     .where(eq(users.email, email))
+//     .limit(1);
+//
+//   if (existingUser.length > 0) {
+//     return { success: false, error: "User already exists" };
+//   }
+//
+//   // "salt": complexity upon which it'll be hashed
+//   const hashedPassword = await hash(password, 10);
+//
+//   try {
+//     // how you create user
+//     await db.insert(users).values({
+//       fullName,
+//       email,
+//       universityId,
+//       password: hashedPassword,
+//       universityCard,
+//     });
+//
+//     // trigger the workflow immediately after we create the user
+//     await workflowClient.trigger({
+//       url: `${config.env.prodApiEndpoint}/api/workflow/onboarding`,
+//       body: {
+//         email,
+//         fullName,
+//       },
+//     });
+//
+//     //!!! automatically signIn for new user
+//     return await signInWithCredentials({ email, password });
+//   } catch (e) {
+//     console.log(e, "Signup error");
+//     return { success: false, error: "Signup error" };
+//   }
+// };
+
 export const signUp = async (params: AuthCredentials) => {
   const { fullName, email, password, universityCard, universityId } = params;
 
-  // get the current ip address(rate limit)
   const ip = (await headers()).get("x-forwarded-for") || "127.0.0.1";
-  // this success will let us know if we can go to that page successfully
   const { success } = await ratelimit.limit(ip);
-
-  if (!success) {
-    return redirect("/too-fast");
-  }
+  if (!success) return redirect("/too-fast");
 
   const existingUser = await db
     .select()
@@ -70,11 +121,9 @@ export const signUp = async (params: AuthCredentials) => {
     return { success: false, error: "User already exists" };
   }
 
-  // "salt": complexity upon which it'll be hashed
   const hashedPassword = await hash(password, 10);
 
   try {
-    // how you create user
     await db.insert(users).values({
       fullName,
       email,
@@ -83,16 +132,20 @@ export const signUp = async (params: AuthCredentials) => {
       universityCard,
     });
 
-    // trigger the workflow immediately after we create the user
-    await workflowClient.trigger({
-      url: `${config.env.prodApiEndpoint}/api/workflow/onboarding`,
-      body: {
-        email,
-        fullName,
-      },
+    // 🔹 Send Welcome Email
+    await sendEmail({
+      email,
+      subject: "Welcome to BookWise!",
+      renderEmail: () => renderWelcomeEmail(fullName),
     });
 
-    //!!! automatically signIn for new user
+    // 🔹 Send Account Approval Email (Admins can trigger separately)
+    await sendEmail({
+      email,
+      subject: "Your BookWise Account Has Been Approved!",
+      renderEmail: () => renderAccountApprovalEmail(fullName),
+    });
+
     return await signInWithCredentials({ email, password });
   } catch (e) {
     console.log(e, "Signup error");
