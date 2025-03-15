@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Text, Button } from "@react-email/components";
 import EmailLayout from "./EmailLayout";
+import { render } from "@react-email/render";
 
 interface InactivityReminderEmailProps {
   fullName: string;
@@ -29,7 +30,7 @@ export const InactivityReminderEmail = ({
       </Text>
 
       <Button
-        href="https://bookwise.yourdomain.com/library"
+        href="https://book-store-rho-woad.vercel.app"
         style={{
           backgroundColor: "#E7C9A5",
           color: "#1e293b",
@@ -43,14 +44,16 @@ export const InactivityReminderEmail = ({
         Explore Books on BookWise
       </Button>
 
-      <Text style={{ color: "#f8fafc", marginTop: "16px" }}>See you soon,</Text>
+      <Text style={{ color: "#f8fafc", marginTop: "16px" }}>
+        See you soon,
+        <br />
+        The BookWise Team
+      </Text>
     </EmailLayout>
   );
 };
 
 export default InactivityReminderEmail;
-
-import { render } from "@react-email/render";
 
 export async function renderInactivityReminderEmail(
   fullName: string,

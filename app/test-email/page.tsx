@@ -21,6 +21,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Link from "next/link";
 
 const emailTypes = [
   { id: "welcome", name: "Welcome Email", description: "For new users" },
@@ -123,11 +124,13 @@ export default function TestEmailPage() {
     <div className="container mx-auto py-10">
       <div className="flex flex-col items-center justify-center mb-8">
         <div className="flex items-center mb-4">
-          <img
-            src="/icons/logo.svg"
-            alt="BookWise"
-            className="h-10 w-10 mr-2"
-          />
+          <Link href="/">
+            <img
+              src="/icons/logo.svg"
+              alt="BookWise"
+              className="h-10 w-10 mr-2"
+            />
+          </Link>
           <h1 className="text-3xl font-bold">BookWise Email Testing</h1>
         </div>
         <p className="text-light-500 text-center max-w-xl">

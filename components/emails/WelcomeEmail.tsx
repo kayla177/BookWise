@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Text, Button } from "@react-email/components";
 import EmailLayout from "./EmailLayout";
+import { render } from "@react-email/render";
 
 interface WelcomeEmailProps {
   fullName: string;
@@ -27,7 +28,7 @@ export const WelcomeEmail = ({ fullName }: WelcomeEmailProps) => {
       </Text>
 
       <Button
-        href="https://bookwise.yourdomain.com/login"
+        href="https://book-store-rho-woad.vercel.app/sign-in"
         style={{
           backgroundColor: "#E7C9A5",
           color: "#1e293b",
@@ -40,13 +41,16 @@ export const WelcomeEmail = ({ fullName }: WelcomeEmailProps) => {
       >
         Login to BookWise
       </Button>
+      <Text style={{ color: "#f8fafc", marginTop: "16px" }}>
+        Happy reading,
+        <br />
+        The BookWise Team
+      </Text>
     </EmailLayout>
   );
 };
 
 export default WelcomeEmail;
-
-import { render } from "@react-email/render";
 
 export async function renderWelcomeEmail(fullName: string): Promise<string> {
   return render(<WelcomeEmail fullName={fullName} />);

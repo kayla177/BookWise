@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Text, Button } from "@react-email/components";
 import EmailLayout from "./EmailLayout";
+import { render } from "@react-email/render";
 
 interface WelcomeBackEmailProps {
   fullName: string;
@@ -26,7 +27,7 @@ export const WelcomeBackEmail = ({ fullName }: WelcomeBackEmailProps) => {
       </Text>
 
       <Button
-        href="https://bookwise.yourdomain.com/library/new-arrivals"
+        href="https://book-store-rho-woad.vercel.app/library"
         style={{
           backgroundColor: "#E7C9A5",
           color: "#1e293b",
@@ -42,6 +43,8 @@ export const WelcomeBackEmail = ({ fullName }: WelcomeBackEmailProps) => {
 
       <Text style={{ color: "#f8fafc", marginTop: "16px" }}>
         Happy to have you back!
+        <br />
+        The BookWise Team
       </Text>
     </EmailLayout>
   );
@@ -50,7 +53,6 @@ export const WelcomeBackEmail = ({ fullName }: WelcomeBackEmailProps) => {
 export default WelcomeBackEmail;
 
 // Function to render the email as an HTML string for Resend
-import { render } from "@react-email/render";
 
 export async function renderWelcomeBackEmail(
   fullName: string,

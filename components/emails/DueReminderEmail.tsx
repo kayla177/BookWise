@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Text, Button } from "@react-email/components";
 import EmailLayout from "./EmailLayout";
+import { render } from "@react-email/render";
 
 interface DueReminderEmailProps {
   fullName: string;
@@ -32,7 +33,7 @@ export const DueReminderEmail = ({
       </Text>
 
       <Button
-        href="https://bookwise.yourdomain.com/my-profile"
+        href="https://book-store-rho-woad.vercel.app/my-profile"
         style={{
           backgroundColor: "#E7C9A5",
           color: "#1e293b",
@@ -46,14 +47,16 @@ export const DueReminderEmail = ({
         Renew Book Now
       </Button>
 
-      <Text style={{ color: "#f8fafc", marginTop: "16px" }}>Keep reading,</Text>
+      <Text style={{ color: "#f8fafc", marginTop: "16px" }}>
+        Keep reading,
+        <br />
+        The BookWise Team
+      </Text>
     </EmailLayout>
   );
 };
 
 export default DueReminderEmail;
-
-import { render } from "@react-email/render";
 
 export async function renderDueReminderEmail(params: {
   fullName: string;

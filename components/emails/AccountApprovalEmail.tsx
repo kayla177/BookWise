@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Text, Button } from "@react-email/components";
 import EmailLayout from "./EmailLayout";
+import { render } from "@react-email/render";
 
 interface AccountApprovalEmailProps {
   fullName: string;
@@ -29,7 +30,7 @@ export const AccountApprovalEmail = ({
       </Text>
 
       <Button
-        href="https://bookwise.yourdomain.com/login"
+        href="https://book-store-rho-woad.vercel.app/sign-in"
         style={{
           backgroundColor: "#E7C9A5",
           color: "#1e293b",
@@ -45,14 +46,14 @@ export const AccountApprovalEmail = ({
 
       <Text style={{ color: "#f8fafc", marginTop: "16px" }}>
         Welcome aboard,
+        <br />
+        The BookWise Team
       </Text>
     </EmailLayout>
   );
 };
 
 export default AccountApprovalEmail;
-
-import { render } from "@react-email/render";
 
 export async function renderAccountApprovalEmail(
   fullName: string,
