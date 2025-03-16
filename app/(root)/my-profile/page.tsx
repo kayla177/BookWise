@@ -54,8 +54,8 @@ const Page = async () => {
     .limit(10)
     .orderBy(desc(borrowRecords.borrowDate));
 
-  console.log("[MY-PROFILE] Latest Books: ", latestBooks);
-  console.log("[MY-PROFILE] user: ", user[0]);
+  // console.log("[MY-PROFILE] Latest Books: ", latestBooks);
+  // console.log("[MY-PROFILE] user: ", user[0]);
 
   return (
     <>

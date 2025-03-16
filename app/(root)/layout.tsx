@@ -27,7 +27,7 @@ const Layout = async ({ children }: { children: ReactNode }) => {
       .where(eq(users.id, session?.user?.id))
       .limit(1);
 
-    console.log("[root/layout.tsx]User Query Result:", user);
+    // console.log("[root/layout.tsx]User Query Result:", user);
 
     // Safety check: Ensure user exists before accessing lastActivityDate
     if (!user.length || !user[0]?.lastActivityDate) {

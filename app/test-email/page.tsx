@@ -23,6 +23,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 
+// all email types that can be tested
 const emailTypes = [
   { id: "welcome", name: "Welcome Email", description: "For new users" },
   {
@@ -83,13 +84,16 @@ export default function TestEmailPage() {
     setIsLoading(true);
 
     try {
-      // Build the query parameters
+      // build query parameters by adding user input to URL
       const params = new URLSearchParams();
+      console.log("[TEST-EMAIL] params: ", params);
       params.append("type", emailType);
       params.append("email", email);
       if (name) params.append("name", name);
       if (book) params.append("book", book);
+      console.log("[TEST-EMAIL] params after: ", params);
 
+      // send request to test-email API route
       const response = await fetch(`/api/test-email?${params.toString()}`);
       const data = await response.json();
 
