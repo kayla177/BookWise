@@ -137,7 +137,7 @@ export const sendEmail = async ({
     console.log(`🟡 Rendered Email Preview:`, html.substring(0, 200));
 
     const response = await resend.emails.send({
-      from: "Kayla <contact@kayla-li.com>",
+      from: "BookWise <contact@kayla-li.com>",
       to: [email],
       subject,
       html,

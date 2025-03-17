@@ -38,6 +38,11 @@ export const adminSideBarLinks = [
     route: "/admin/account-requests",
     text: "Account Requests",
   },
+  {
+    img: "/icons/admin/chart.svg", // You can use any appropriate icon
+    route: "/admin/engagement-dashboard",
+    text: "Engagement",
+  },
 ];
 
 export const FIELD_NAMES = {
