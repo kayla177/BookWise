@@ -1,4 +1,3 @@
-// app/admin/engagement-dashboard/EngagementDashboardClient.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -53,16 +52,22 @@ const daysSinceActivity = (dateStr: string | null) => {
 
 // Get engagement status based on days
 const getEngagementStatus = (days: number | string) => {
-  if (days === "N/A")
+  if (days === "N/A") {
     return { status: "unknown", label: "Unknown", color: "bg-gray-300" };
-  if (days <= 1)
+  }
+
+  // Ensure 'days' is a number
+  const daysNumber = typeof days === "string" ? Number(days) : days;
+
+  if (daysNumber <= 1)
     return { status: "active", label: "Active", color: "bg-green-500" };
-  if (days <= 3)
+  if (daysNumber <= 3)
     return { status: "regular", label: "Regular", color: "bg-blue-400" };
-  if (days <= 7)
+  if (daysNumber <= 7)
     return { status: "cooling", label: "Cooling", color: "bg-yellow-400" };
-  if (days <= 30)
+  if (daysNumber <= 30)
     return { status: "inactive", label: "Inactive", color: "bg-orange-500" };
+
   return { status: "dormant", label: "Dormant", color: "bg-red-500" };
 };
 
