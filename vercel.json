@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/cron/engagement?key=NEXT_PUBLIC_CRON_SECRET_KEY",
+      "path": "/api/cron/engagement?key=${NEXT_PUBLIC_CRON_SECRET_KEY}",
       "schedule": "0 9 * * *"
     }
   ]

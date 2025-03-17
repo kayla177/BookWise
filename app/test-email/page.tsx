@@ -112,6 +112,38 @@ export default function TestEmailPage() {
     }
   };
 
+  const handleSendDirectEmail = async () => {
+    if (!email) {
+      return toast.error("Email address is required");
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(
+        `/api/test-direct-resend?email=${email}&name=${name || "Test User"}`,
+      );
+      const data = await response.json();
+
+      setTestResults(data);
+
+      if (data.success) {
+        toast.success("Direct email sent successfully", {
+          description: `Direct email sent to ${email}`,
+        });
+      } else {
+        toast.error("Failed to send direct email", {
+          description: data.error || "An unknown error occurred",
+        });
+      }
+    } catch (error) {
+      console.error("Error sending direct email:", error);
+      toast.error("Error sending direct email");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Get currently selected email type info
   const selectedEmailType = emailTypes.find((type) => type.id === emailType);
 
@@ -205,7 +237,7 @@ export default function TestEmailPage() {
                 </div>
               )}
             </CardContent>
-            <CardFooter>
+            <CardFooter className="flex flex-col space-y-4">
               <Button
                 onClick={handleSendTestEmail}
                 disabled={isLoading}
@@ -213,6 +245,22 @@ export default function TestEmailPage() {
               >
                 {isLoading ? "Sending..." : "Send Test Email"}
               </Button>
+
+              <div className="w-full border-t pt-4">
+                <p className="text-sm text-muted-foreground mb-2">
+                  Alternative testing option:
+                </p>
+                <Button
+                  onClick={handleSendDirectEmail}
+                  disabled={isLoading}
+                  variant="outline"
+                  className="w-full"
+                >
+                  {isLoading
+                    ? "Sending..."
+                    : "Send Direct Email (Bypass Templates)"}
+                </Button>
+              </div>
             </CardFooter>
           </Card>
         </TabsContent>

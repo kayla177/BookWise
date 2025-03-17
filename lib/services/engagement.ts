@@ -1,4 +1,3 @@
-// lib/services/engagement.ts
 "use server";
 
 import { db } from "@/database/drizzle";
@@ -6,7 +5,6 @@ import { users } from "@/database/schema";
 import { eq } from "drizzle-orm";
 import { sendEmail } from "@/lib/workflow";
 import { renderInactivityReminderEmail } from "@/components/emails/InactivityReminderEmail";
-import { renderWelcomeBackEmail } from "@/components/emails/WelcomeBackEmail";
 
 // Helper to calculate days between two dates (not exported so doesn't need to be async)
 const daysBetween = (date1: Date, date2: Date): number => {
@@ -15,9 +13,7 @@ const daysBetween = (date1: Date, date2: Date): number => {
   return Math.round(diffTime / oneDay);
 };
 
-/**
- * Check if a user should receive an activity reminder
- */
+// Check if a user should receive an activity reminder
 export async function shouldSendActivityReminder(
   lastActivityDate: Date | null,
 ): Promise<boolean> {
@@ -26,62 +22,128 @@ export async function shouldSendActivityReminder(
   const now = new Date();
   const daysSinceActivity = daysBetween(lastActivityDate, now);
 
+  console.log(`Days since activity: ${daysSinceActivity}`);
   return daysSinceActivity >= 3 && daysSinceActivity <= 30;
 }
 
-/**
- * Update a user's last activity date
- */
+// Update a user's last activity date
 export async function trackUserActivity(userId: string): Promise<void> {
   const today = new Date().toISOString().slice(0, 10);
 
-  await db
-    .update(users)
-    .set({ lastActivityDate: today })
-    .where(eq(users.id, userId));
+  try {
+    await db
+      .update(users)
+      .set({ lastActivityDate: today })
+      .where(eq(users.id, userId));
 
-  console.log(`User ${userId} activity tracked on ${today}`);
+    console.log(
+      `[SERVICES/ENGAGEMENT] User ${userId} activity tracked on ${today}`,
+    );
+  } catch (error) {
+    console.error(`Error updating activity for user ${userId}:`, error);
+  }
 }
 
-/**
- * Process user engagement (for API route/cron job)
- */
+// identifies inactive users and sends them reminder emails
 export async function processUserEngagement(): Promise<{
   processed: number;
   reminded: number;
 }> {
-  // Get all users
-  const allUsers = await db.select().from(users);
-  const now = new Date();
-  let remindedCount = 0;
+  console.log("[SERVICES/ENGAGEMENT] Starting user engagement processing...");
 
-  // Process each user
-  for (const user of allUsers) {
-    // Skip users without last activity date
-    if (!user.lastActivityDate) continue;
+  try {
+    const allUsers = await db.select().from(users);
+    console.log(`[SERVICES/ENGAGEMENT] Found ${allUsers.length} users total`);
 
-    const lastActivityDate = new Date(user.lastActivityDate);
-    const daysSinceActivity = daysBetween(lastActivityDate, now);
+    if (allUsers.length === 0) {
+      console.log("[SERVICES/ENGAGEMENT] No users found in database!");
+      return { processed: 0, reminded: 0 };
+    }
 
-    // Users inactive for more than 3 days but less than 30 days
-    if (daysSinceActivity > 3 && daysSinceActivity <= 30) {
-      remindedCount++;
+    console.log(`Processing ${allUsers.length} users...`);
 
-      // Send inactivity reminder
-      await sendEmail({
-        email: user.email,
-        subject: "We Miss You at BookWise!",
-        renderEmail: () => renderInactivityReminderEmail(user.fullName),
-      });
+    const now = new Date();
+    let remindedCount = 0;
+
+    // Process each user
+    for (const user of allUsers) {
+      console.log(
+        `\n[SERVICES/ENGAGEMENT]Processing user: ${user.fullName} (${user.email})`,
+      );
+
+      // Skip users without last activity date
+      if (!user.lastActivityDate) {
+        console.log(
+          `[SERVICES/ENGAGEMENT] Skipping user ${user.email} - no last activity date`,
+        );
+        continue;
+      }
+
+      const lastActivityDate = new Date(user.lastActivityDate);
+      const daysSinceActivity = daysBetween(lastActivityDate, now);
 
       console.log(
-        `📧 Sent inactivity reminder to ${user.email} (inactive for ${daysSinceActivity} days)`,
+        `[SERVICES/ENGAGEMENT] User ${user.email} last active ${daysSinceActivity} days ago (${lastActivityDate.toISOString().split("T")[0]})`,
       );
-    }
-  }
 
-  return {
-    processed: allUsers.length,
-    reminded: remindedCount,
-  };
+      // Users inactive for 3-30 days should receive a reminder
+      if (daysSinceActivity >= 3 && daysSinceActivity <= 30) {
+        console.log(
+          `[SERVICES/ENGAGEMENT] User ${user.email} needs an inactivity reminder`,
+        );
+
+        try {
+          // Send inactivity reminder
+          console.log(
+            `[SERVICES/ENGAGEMENT] Sending inactivity reminder to ${user.email}...`,
+          );
+
+          const emailResult = await sendEmail({
+            email: user.email,
+            subject: "We Miss You at BookWise!",
+            renderEmail: () => renderInactivityReminderEmail(user.fullName),
+          });
+
+          if (emailResult.success) {
+            console.log(
+              `[SERVICES/ENGAGEMENT] Email successfully sent to ${user.email}`,
+            );
+            remindedCount++;
+          } else {
+            console.error(
+              `[SERVICES/ENGAGEMENT] Failed to send email to ${user.email}:`,
+              emailResult.error,
+            );
+          }
+        } catch (error) {
+          console.error(
+            `[SERVICES/ENGAGEMENT] Error sending email to ${user.email}:`,
+            error,
+          );
+        }
+      } else {
+        console.log(
+          `[SERVICES/ENGAGEMENT] User ${user.email} is ${daysSinceActivity <= 2 ? "active" : "dormant"} (${daysSinceActivity} days)`,
+        );
+      }
+    }
+
+    console.log(
+      `\n[SERVICES/ENGAGEMENT] Engagement processing complete: ${allUsers.length} users processed, ${remindedCount} reminders sent`,
+    );
+
+    return {
+      processed: allUsers.length,
+      reminded: remindedCount,
+    };
+  } catch (error) {
+    console.error(
+      "[SERVICES/ENGAGEMENT] Error processing user engagement:",
+      error,
+    );
+    return {
+      processed: 0,
+      reminded: 0,
+    };
+  }
 }

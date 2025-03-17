@@ -1,31 +1,33 @@
-// app/api/test-direct-email/route.ts
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import config from "@/lib/config";
 
 export async function GET(request: Request) {
   try {
-    // Initialize Resend directly
     const resend = new Resend(config.env.resendToken);
 
     // Get email from query params
     const url = new URL(request.url);
     const testEmail = url.searchParams.get("email") || "test@example.com";
 
-    // Log the token (first few characters) for debugging
     console.log(
-      `Using Resend token: ${config.env.resendToken?.substring(0, 5)}...`,
+      `[TEST_DIRECT_EMAIL] Using Resend token: ${config.env.resendToken?.substring(0, 5)}...`,
     );
+
+    console.log("Attempting to send direct email using Resend");
 
     // Call Resend API directly
     const { data, error } = await resend.emails.send({
-      from: "BookWise <onboarding@resend.dev>", // Use Resend's verified domain initially
+      from: "BookWise <contact@kayla-li.com>", // Make sure this domain is verified in Resend
       to: [testEmail],
       subject: "Direct Resend API Test",
-      html: "<p>This is a direct test of the Resend API without QStash.</p>",
+      html:
+        "<p>This is a direct test of the Resend API without QStash.</p><p>Time: " +
+        new Date().toISOString() +
+        "</p>",
     });
 
-    console.log("Resend API response:", data);
+    console.log("[TEST_DIRECT_EMAIL] Resend API response:", data);
 
     if (error) {
       throw new Error(JSON.stringify(error));
