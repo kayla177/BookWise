@@ -1,28 +1,3 @@
-// import React from "react";
-// import BorrowBookCard from "@/components/BorrowBookCard";
-//
-// interface Props {
-//   // "BorrowBook" are defined in types.d.ts
-//   books: BorrowBook[];
-// }
-//
-// const BorrowBookList = ({ books }: Props) => {
-//   return (
-//     <>
-//       <h1 className="font-semibold text-light-100 text-3xl">Borrowed books</h1>
-//       <section>
-//         <ul className="book-list">
-//           {books.map((book) => {
-//             // Check if book is a BorrowBook (has a book field)
-//             return <BorrowBookCard key={book.id} {...book} />;
-//           })}
-//         </ul>
-//       </section>
-//     </>
-//   );
-// };
-// export default BorrowBookList;
-
 import React from "react";
 import BorrowBookCard from "@/components/BorrowBookCard";
 
