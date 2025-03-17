@@ -130,12 +130,10 @@ const BorrowReceipt: React.FC<ReceiptProps> = ({
               <span className="font-semibold">BookWise</span>!
             </p>
             <p>
-              Website:{" "}
-              <span className="text-primary">bookwise.example.com</span>
+              Website: <span className="text-primary">books.kayla-li.com</span>
             </p>
             <p>
-              Email:{" "}
-              <span className="text-primary">support@bookwise.example.com</span>
+              Email: <span className="text-primary">contact@kayla-li.com</span>
             </p>
           </div>
         </div>

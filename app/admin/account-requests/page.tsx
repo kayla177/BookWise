@@ -1,26 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { ImageKitProvider, IKImage } from "imagekitio-next";
 import config from "@/lib/config";
 import { AccountRequestModal } from "@/components/admin/modals/AccountRequestModal";
 import { toast } from "sonner";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ArrowUpDown,
-  Eye,
-  Trash2,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
+import { accountRequestsDev2 } from "@/constants";
+import AccountRequestCard from "@/components/admin/AccountRequestCard";
 
 interface User {
   id: string;
@@ -91,32 +79,7 @@ const Page = () => {
 
       // For development, add some sample data if the API fails
       if (process.env.NODE_ENV === "development") {
-        setPendingUsers([
-          {
-            id: "1",
-            fullName: "Darrell Steward",
-            email: "darrellsteward@gmail.com",
-            universityId: 90324423789,
-            universityCard: "/path/to/id-card.jpg",
-            dateJoined: "Dec 19 2023",
-          },
-          {
-            id: "2",
-            fullName: "Marc Atenson",
-            email: "marcine@gmail.com",
-            universityId: 45641243423,
-            universityCard: "/path/to/id-card.jpg",
-            dateJoined: "Dec 19 2023",
-          },
-          {
-            id: "3",
-            fullName: "Susan Drake",
-            email: "contact@susandrake.io",
-            universityId: 78316342289,
-            universityCard: "/path/to/id-card.jpg",
-            dateJoined: "Dec 19 2023",
-          },
-        ]);
+        setPendingUsers(accountRequestsDev2);
       }
     } finally {
       setLoading(false);
@@ -300,65 +263,12 @@ const Page = () => {
             </p>
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Date Joined</TableHead>
-                <TableHead>University ID No</TableHead>
-                <TableHead>University ID Card</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {pendingUsers.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-light-400 flex items-center justify-center">
-                        {user.fullName.charAt(0)}
-                      </div>
-                      <div>
-                        <p className="text-dark-400 font-medium">
-                          {user.fullName}
-                        </p>
-                        <p className="text-light-500 text-sm">{user.email}</p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{user.dateJoined}</TableCell>
-                  <TableCell>{user.universityId}</TableCell>
-                  <TableCell>
-                    <Button
-                      variant="link"
-                      className="text-blue-500 flex items-center gap-1"
-                      onClick={() => viewIdCard(user)}
-                    >
-                      <Eye size={16} className="text-blue-500" />
-                      View ID Card
-                    </Button>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => handleApprove(user)}
-                        className="bg-green-500 text-white hover:bg-green-600"
-                      >
-                        Approve Account
-                      </Button>
-                      <Button
-                        onClick={() => handleDeny(user)}
-                        variant="ghost"
-                        className="text-red-500"
-                      >
-                        <Trash2 size={18} className="text-red-500" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <AccountRequestCard
+            pendingUsers={pendingUsers}
+            viewIdCard={viewIdCard}
+            handleApprove={handleApprove}
+            handleDeny={handleDeny}
+          />
         )}
 
         {/* Approve Modal */}

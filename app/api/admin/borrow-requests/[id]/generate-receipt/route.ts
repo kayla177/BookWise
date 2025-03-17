@@ -5,12 +5,25 @@ import { eq } from "drizzle-orm";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } },
+  context: { params: { id: string } }, // ✅ Fix: Properly extract `id`
 ) {
-  try {
-    const { id } = params;
+  const { id } = context.params; // ✅ Correct param extraction
 
-    // Get borrow record with related info
+  console.log(`🔍 Received API request for borrow ID:`, id);
+
+  // ✅ Fix: Ensure `id` is a valid UUID
+  if (!id || id.length !== 36) {
+    console.error("❌ Invalid UUID format:", id);
+    return NextResponse.json(
+      { error: "Invalid borrow record ID format" },
+      { status: 400 },
+    );
+  }
+
+  try {
+    console.log(`🔍 Querying database for borrow record ID: ${id}`);
+
+    // ✅ Fix: Fetch borrow record properly
     const record = await db
       .select({
         id: borrowRecords.id,
@@ -19,7 +32,6 @@ export async function GET(
         returnDate: borrowRecords.returnDate,
         status: borrowRecords.status,
 
-        // User info
         user: {
           id: users.id,
           fullName: users.fullName,
@@ -27,11 +39,11 @@ export async function GET(
           universityId: users.universityId,
         },
 
-        // Book info
         book: {
           id: books.id,
           title: books.title,
           author: books.author,
+          genre: books.genre,
           coverUrl: books.coverUrl,
           coverColor: books.coverColor,
         },
@@ -42,35 +54,38 @@ export async function GET(
       .where(eq(borrowRecords.id, id))
       .limit(1);
 
-    if (record.length === 0) {
+    console.log(`📌 Query result:`, record);
+
+    if (!record || record.length === 0) {
+      console.error("❌ Borrow record not found for ID:", id);
       return NextResponse.json(
         { error: "Borrow record not found" },
         { status: 404 },
       );
     }
 
-    // Generate a unique receipt ID
-    const receiptId = `REC-${id.substring(0, 8)}-${Date.now().toString(36)}`;
-
-    // Format dates for the receipt
-    const formatDate = (date: Date | string | null) => {
+    const formatDate = (date: string | Date | null) => {
       if (!date) return "";
-      return new Date(date).toLocaleDateString("en-US", {
+      const parsedDate = new Date(date);
+      if (isNaN(parsedDate.getTime())) return "Invalid Date";
+      return parsedDate.toLocaleDateString("en-US", {
         year: "numeric",
-        month: "short",
+        month: "long",
         day: "numeric",
       });
     };
 
-    // Create receipt data
+    const receiptId = `REC-${id.substring(0, 8)}-${Date.now().toString(36)}`;
+
+    // format data
     const receiptData = {
       receiptId: receiptId,
       borrowInfo: {
         id: record[0].id,
-        borrowDate: formatDate(new Date(record[0].borrowDate)),
-        dueDate: formatDate(new Date(record[0].dueDate)),
+        borrowDate: formatDate(record[0].borrowDate),
+        dueDate: formatDate(record[0].dueDate),
         returnDate: record[0].returnDate
-          ? formatDate(new Date(record[0].returnDate))
+          ? formatDate(record[0].returnDate)
           : null,
         status: record[0].status,
       },
@@ -83,18 +98,21 @@ export async function GET(
       book: {
         id: record[0].book.id,
         title: record[0].book.title,
+        genre: record[0].book.genre,
         author: record[0].book.author,
         coverUrl: record[0].book.coverUrl,
       },
       issuedAt: formatDate(new Date()),
     };
 
+    console.log("✅ Successfully generated receipt:", receiptData);
+
     return NextResponse.json({
       success: true,
       receipt: receiptData,
     });
   } catch (error) {
-    console.error("Error generating receipt:", error);
+    console.error("🚨 Error in generate-receipt API:", error);
     return NextResponse.json(
       { error: "Failed to generate receipt", details: String(error) },
       { status: 500 },

@@ -29,7 +29,7 @@ export const CheckInReminderEmail = ({
       </Text>
 
       <Button
-        href="https://book-store-rho-woad.vercel.app/sign-in"
+        href="https://book.kayla-li.com/sign-in"
         style={{
           backgroundColor: "#E7C9A5",
           color: "#1e293b",

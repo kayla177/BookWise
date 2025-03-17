@@ -53,7 +53,7 @@ export const BookBorrowedEmail = ({
       </table>
 
       <Button
-        href="https://book-store-rho-woad.vercel.app/my-profile"
+        href="https://books.kayla-li.com/my-profile"
         style={{
           backgroundColor: "#E7C9A5",
           color: "#1e293b",

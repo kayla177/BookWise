@@ -22,7 +22,7 @@ export default function EmailTemplate({ name }: { name: string }) {
             books! 📚
           </Text>
           <Button
-            href="https://book-store-rho-woad.vercel.app/"
+            href="https://books.kayla-li.com/"
             style={{
               backgroundColor: "#007BFF",
               color: "white",

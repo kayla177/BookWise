@@ -30,7 +30,7 @@ export const AccountApprovalEmail = ({
       </Text>
 
       <Button
-        href="https://book-store-rho-woad.vercel.app/sign-in"
+        href="https://books.kayla-li.com/sign-in"
         style={{
           backgroundColor: "#E7C9A5",
           color: "#1e293b",

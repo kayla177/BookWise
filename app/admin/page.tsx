@@ -7,6 +7,12 @@ import { Button } from "@/components/ui/button";
 import { IKImage, ImageKitProvider } from "imagekitio-next";
 import { Calendar, Eye, ArrowUp, ArrowDown, Plus } from "lucide-react";
 import config from "@/lib/config";
+import {
+  accountRequestsDev,
+  borrowRequestsDev,
+  recentBooksDev,
+  statsDev,
+} from "@/constants";
 
 // Define types
 interface BookRequest {
@@ -97,44 +103,7 @@ const AdminDashboard = () => {
         console.error("Failed to fetch book requests:", error);
 
         // Fallback data for development
-        setBookRequests([
-          {
-            id: "1",
-            title: "Inside Evil: Inside Evil Series, Book 1",
-            coverUrl: "/books/covers/book1.jpg",
-            coverColor: "#27364E",
-            author: "Rachel Heng",
-            genre: "Strategic, Fantasy",
-            user: {
-              name: "Darrell Stewards",
-            },
-            date: "12/01/24",
-          },
-          {
-            id: "2",
-            title: "Jayne Castle - People in Glass Houses",
-            coverUrl: "/books/covers/book2.jpg",
-            coverColor: "#67213B",
-            author: "Rachel Heng",
-            genre: "Strategic, Fantasy",
-            user: {
-              name: "Darrell Stewards",
-            },
-            date: "12/01/24",
-          },
-          {
-            id: "3",
-            title: "The Great Reclamation: A Novel",
-            coverUrl: "/books/covers/book3.jpg",
-            coverColor: "#27364E",
-            author: "Rachel Heng",
-            genre: "Strategic, Fantasy",
-            user: {
-              name: "Darrell Stewards",
-            },
-            date: "12/01/24",
-          },
-        ]);
+        setBookRequests(borrowRequestsDev);
       } finally {
         setLoading((prev) => ({ ...prev, bookRequests: false }));
       }
@@ -181,50 +150,7 @@ const AdminDashboard = () => {
         console.error("Failed to fetch account requests:", error);
 
         // Fallback data for development
-        setAccountRequests([
-          {
-            id: "1",
-            name: "Marc Atenson",
-            email: "marcine@gmail.com",
-            initials: "MA",
-            bgColor: "#dcf2ff",
-          },
-          {
-            id: "2",
-            name: "Susan Drake",
-            email: "contact@susandrake.io",
-            initials: "SD",
-            bgColor: "#e1e1ff",
-          },
-          {
-            id: "3",
-            name: "Ronald Richards",
-            email: "ronaldrichard@gmail.com",
-            initials: "RR",
-            bgColor: "#ffefd5",
-          },
-          {
-            id: "4",
-            name: "Jane Cooper",
-            email: "janecooper@proton.me",
-            initials: "JC",
-            bgColor: "#f5f5f5",
-          },
-          {
-            id: "5",
-            name: "Ian Warren",
-            email: "wadewarren@mail.to",
-            initials: "IW",
-            bgColor: "#e6ffe6",
-          },
-          {
-            id: "6",
-            name: "Darrell Steward",
-            email: "darrellsteward@gmail.com",
-            initials: "DS",
-            bgColor: "#ffe6e6",
-          },
-        ]);
+        setAccountRequests(accountRequestsDev);
       } finally {
         setLoading((prev) => ({ ...prev, accountRequests: false }));
       }
@@ -261,56 +187,7 @@ const AdminDashboard = () => {
         console.error("Failed to fetch recent books:", error);
 
         // Fallback data for development
-        setRecentBooks([
-          {
-            id: "1",
-            title: "The Great Reclamation: A Novel by Rachel Heng",
-            author: "Rachel Heng",
-            genre: "Strategic, Fantasy",
-            coverUrl: "/books/covers/book1.jpg",
-            date: "12/01/24",
-          },
-          {
-            id: "2",
-            title: "Inside Evil: Inside Evil Series, Book 1",
-            author: "Rachel Heng",
-            genre: "Strategic, Fantasy",
-            coverUrl: "/books/covers/book2.jpg",
-            date: "12/01/24",
-          },
-          {
-            id: "3",
-            title: "Jayne Castle - People in Glass Houses",
-            author: "Rachel Heng",
-            genre: "Strategic, Fantasy",
-            coverUrl: "/books/covers/book3.jpg",
-            date: "12/01/24",
-          },
-          {
-            id: "4",
-            title: "The Great Reclamation: A Novel by Rachel Heng",
-            author: "Rachel Heng",
-            genre: "Strategic, Fantasy",
-            coverUrl: "/books/covers/book1.jpg",
-            date: "12/01/24",
-          },
-          {
-            id: "5",
-            title: "Inside Evil: Inside Evil Series, Book 1",
-            author: "Rachel Heng",
-            genre: "Strategic, Fantasy",
-            coverUrl: "/books/covers/book2.jpg",
-            date: "12/01/24",
-          },
-          {
-            id: "6",
-            title: "Jayne Castle - People in Glass Houses",
-            author: "Rachel Heng",
-            genre: "Strategic, Fantasy",
-            coverUrl: "/books/covers/book3.jpg",
-            date: "12/01/24",
-          },
-        ]);
+        setRecentBooks(recentBooksDev);
       } finally {
         setLoading((prev) => ({ ...prev, recentBooks: false }));
       }
@@ -350,11 +227,7 @@ const AdminDashboard = () => {
         console.error("Failed to fetch statistics:", error);
 
         // Fallback data for development
-        setStats({
-          borrowedBooks: { value: 145, change: 2 },
-          totalUsers: { value: 317, change: 4 },
-          totalBooks: { value: 163, change: 2 },
-        });
+        setStats(statsDev);
       } finally {
         setLoading((prev) => ({ ...prev, stats: false }));
       }

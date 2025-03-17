@@ -1,53 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { IKImage, ImageKitProvider } from "imagekitio-next";
+import { ImageKitProvider } from "imagekitio-next";
 import config from "@/lib/config";
-import { BorrowStatusDropdown } from "@/components/admin/BorrowStatusDropdown";
 import BorrowReceipt from "@/components/admin/BorrowReceipt";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
 
-interface BorrowRequest {
-  id: string;
-  bookId: string;
-  bookTitle: string;
-  bookCover: string;
-  bookAuthor: string;
-  bookGenre: string;
-  userId: string;
-  userName: string;
-  userEmail: string;
-  borrowedDate: string;
-  dueDate: string;
-  returnDate: string;
-  status: "Borrowed" | "Returned" | "Late Return";
-}
-
-interface ReceiptData {
-  receiptId: string;
-  borrowInfo: {
-    borrowDate: string;
-    dueDate: string;
-    returnDate?: string | null;
-    duration: number;
-  };
-  book: {
-    title: string;
-    author: string;
-    genre: string;
-  };
-  issuedAt: string;
-}
+import BorrowRequestCard from "@/components/admin/BorrowRequestCard";
+import PrintReceipt from "@/components/admin/PrintReceipt";
 
 const Page = () => {
   const [borrowRequests, setBorrowRequests] = useState<BorrowRequest[]>([]);
@@ -55,7 +17,7 @@ const Page = () => {
   const [error, setError] = useState<string | null>(null);
   const [showReceipt, setShowReceipt] = useState(false);
   const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc"); // Default to newest first
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -115,72 +77,6 @@ const Page = () => {
       setError(
         err instanceof Error ? err.message : "Failed to load borrow requests",
       );
-
-      // For development, add some sample data if the API fails
-      if (process.env.NODE_ENV === "development") {
-        setBorrowRequests([
-          {
-            id: "1",
-            bookId: "b1",
-            bookTitle: "The Great Reclamation: A Memoir",
-            bookCover: "/books/covers/book1.jpg",
-            bookAuthor: "Sarah Johnson",
-            bookGenre: "Memoir",
-            userId: "u1",
-            userName: "Darrell Steward",
-            userEmail: "darrellsteward@gmail.com",
-            borrowedDate: "Dec 19 2023",
-            dueDate: "Dec 29 2023",
-            returnDate: "Dec 31 2023",
-            status: "Borrowed",
-          },
-          {
-            id: "2",
-            bookId: "b2",
-            bookTitle: "Inside Evil: Inside Evil's Secret Story",
-            bookCover: "/books/covers/book2.jpg",
-            bookAuthor: "Michael Roberts",
-            bookGenre: "True Crime",
-            userId: "u2",
-            userName: "Marc Atenson",
-            userEmail: "marcine@gmail.com",
-            borrowedDate: "Dec 21 2024",
-            dueDate: "Jan 17 2024",
-            returnDate: "Jan 12 2024",
-            status: "Late Return",
-          },
-          {
-            id: "3",
-            bookId: "b3",
-            bookTitle: "Jayne Castle - People Investigation",
-            bookCover: "/books/covers/book3.jpg",
-            bookAuthor: "Jayne Castle",
-            bookGenre: "Mystery",
-            userId: "u3",
-            userName: "Susan Drake",
-            userEmail: "contact@susandrake.io",
-            borrowedDate: "Dec 31 2023",
-            dueDate: "Jan 15 2023",
-            returnDate: "Jan 25 2023",
-            status: "Returned",
-          },
-          {
-            id: "4",
-            bookId: "b1",
-            bookTitle: "The Great Reclamation: A Memoir",
-            bookCover: "/books/covers/book1.jpg",
-            bookAuthor: "Sarah Johnson",
-            bookGenre: "Memoir",
-            userId: "u4",
-            userName: "David Smith",
-            userEmail: "davidc@yahoo.com",
-            borrowedDate: "Dec 19 2023",
-            dueDate: "Dec 29 2023",
-            returnDate: "Dec 31 2023",
-            status: "Borrowed",
-          },
-        ]);
-      }
     } finally {
       setLoading(false);
     }
@@ -267,143 +163,36 @@ const Page = () => {
   };
 
   const generateReceipt = async (requestId: string) => {
+    console.log("[BOOK_REQUEST]Generating receipt for requestId:", requestId);
+
     try {
       const response = await fetch(
         `/api/admin/borrow-requests/${requestId}/generate-receipt`,
       );
 
       if (!response.ok) {
-        throw new Error(`Failed to generate receipt: ${response.statusText}`);
+        throw new Error(
+          `[BOOK_REQUEST] Failed to generate receipt: ${response.statusText}`,
+        );
       }
 
       const data = await response.json();
 
       if (!data.receipt) {
-        throw new Error("Receipt data not found in response");
+        throw new Error("[BOOK_REQUEST] Receipt data not found in response");
       }
 
       setReceiptData(data.receipt);
       setShowReceipt(true);
     } catch (error) {
-      console.error("Error generating receipt:", error);
-      toast.error("Failed to generate receipt", {
+      console.error("[BOOK_REQUEST] Error generating receipt:", error);
+      toast.error("[BOOK_REQUEST] Failed to generate receipt", {
         description:
-          error instanceof Error ? error.message : "Unknown error occurred",
+          error instanceof Error
+            ? error.message
+            : "[BOOK_REQUEST] Unknown error occurred",
       });
     }
-  };
-
-  const handlePrintReceipt = () => {
-    // Create a new window for printing
-    const printWindow = window.open("", "_blank");
-    if (!printWindow || !receiptData) return;
-
-    // Create printable HTML
-    const printContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>BookWise - Borrow Receipt</title>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-            padding: 20px;
-          }
-          .receipt {
-            max-width: 500px;
-            margin: 0 auto;
-            background-color: #1e293b;
-            color: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-          }
-          .receipt-header {
-            padding: 20px;
-            border-bottom: 1px solid #2d3748;
-          }
-          .receipt-body {
-            padding: 20px;
-          }
-          .receipt-footer {
-            padding: 20px;
-            border-top: 1px solid #2d3748;
-            font-size: 14px;
-          }
-          h1, h2, h3 {
-            margin-top: 0;
-          }
-          .highlight {
-            color: #E7C9A5;
-          }
-          ul {
-            padding-left: 20px;
-          }
-          li {
-            margin-bottom: 5px;
-          }
-          .section {
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #2d3748;
-          }
-          @media print {
-            body {
-              background-color: white;
-            }
-            .receipt {
-              box-shadow: none;
-            }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="receipt">
-          <div class="receipt-header">
-            <h1>BookWise</h1>
-            <h2>Borrow Receipt</h2>
-            <p>Receipt ID: <span class="highlight">${receiptData.receiptId}</span></p>
-            <p>Date Issued: <span class="highlight">${receiptData.issuedAt}</span></p>
-          </div>
-          <div class="receipt-body">
-            <div class="section">
-              <h3>Book Details:</h3>
-              <ul>
-                <li>Title: ${receiptData.book.title}</li>
-                <li>Author: ${receiptData.book.author}</li>
-                <li>Genre: ${receiptData.book.genre}</li>
-                <li>Borrowed On: ${receiptData.borrowInfo.borrowDate}</li>
-                <li>Due Date: ${receiptData.borrowInfo.dueDate}</li>
-                <li>Duration: ${receiptData.borrowInfo.duration} Days</li>
-              </ul>
-            </div>
-            <div class="section">
-              <h3>Terms</h3>
-              <ul>
-                <li>Please return the book by the due date.</li>
-                <li>Lost or damaged books may incur replacement costs.</li>
-              </ul>
-            </div>
-            <div class="receipt-footer">
-              <p>Thank you for using <strong>BookWise</strong>!</p>
-              <p>Website: bookwise.example.com</p>
-              <p>Email: support@bookwise.example.com</p>
-            </div>
-          </div>
-        </div>
-        <script>
-          window.onload = function() {
-            window.print();
-          }
-        </script>
-      </body>
-      </html>
-    `;
-
-    printWindow.document.open();
-    printWindow.document.write(printContent);
-    printWindow.document.close();
   };
 
   const goToNextPage = () => {
@@ -482,80 +271,11 @@ const Page = () => {
             <p className="text-gray-600">No borrow requests available.</p>
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Book</TableHead>
-                <TableHead>User Requested</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Borrowed date</TableHead>
-                <TableHead>Due Date</TableHead>
-                <TableHead>Return date</TableHead>
-                <TableHead>Receipt</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {borrowRequests.map((request) => (
-                <TableRow key={request.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <div className="h-12 w-10 relative">
-                        {request.bookCover ? (
-                          <IKImage
-                            path={request.bookCover}
-                            alt={request.bookTitle}
-                            width={40}
-                            height={48}
-                            className="object-cover rounded"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="h-12 w-10 bg-gray-200 rounded flex items-center justify-center text-gray-400 text-xs">
-                            No Image
-                          </div>
-                        )}
-                      </div>
-                      <p className="font-medium text-sm">{request.bookTitle}</p>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-light-400 flex items-center justify-center">
-                        {request.userName.charAt(0)}
-                      </div>
-                      <div>
-                        <p className="text-dark-400 font-medium">
-                          {request.userName}
-                        </p>
-                        <p className="text-light-500 text-xs">
-                          {request.userEmail}
-                        </p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <BorrowStatusDropdown
-                      status={request.status}
-                      onStatusChange={(newStatus) =>
-                        handleStatusChange(request.id, newStatus)
-                      }
-                    />
-                  </TableCell>
-                  <TableCell>{request.borrowedDate}</TableCell>
-                  <TableCell>{request.dueDate}</TableCell>
-                  <TableCell>{request.returnDate}</TableCell>
-                  <TableCell>
-                    <Button
-                      className="book-receipt_admin-btn"
-                      onClick={() => generateReceipt(request.id)}
-                    >
-                      Generate
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <BorrowRequestCard
+            borrowRequests={borrowRequests}
+            handleStatusChange={handleStatusChange}
+            generateReceipt={generateReceipt}
+          />
         )}
 
         {/* Receipt Modal */}
@@ -563,7 +283,7 @@ const Page = () => {
           <BorrowReceipt
             receiptData={receiptData}
             onClose={() => setShowReceipt(false)}
-            onPrint={handlePrintReceipt}
+            onPrint={() => <PrintReceipt receiptData={receiptData} />}
           />
         )}
       </section>

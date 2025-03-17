@@ -54,3 +54,36 @@ interface BorrowBook {
   // Join book details for display
   book: Book;
 }
+
+interface BorrowRequest {
+  id: string;
+  bookId: string;
+  bookTitle: string;
+  bookCover: string;
+  bookAuthor: string;
+  bookGenre: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  borrowedDate: string;
+  dueDate: string;
+  returnDate: string;
+  status: "Borrowed" | "Returned" | "Late Return";
+}
+
+// for print receipt and book-request
+interface ReceiptData {
+  receiptId: string;
+  borrowInfo: {
+    borrowDate: string;
+    dueDate: string;
+    returnDate?: string | null;
+    duration: number;
+  };
+  book: {
+    title: string;
+    author: string;
+    genre: string;
+  };
+  issuedAt: string;
+}
