@@ -8,7 +8,7 @@ export async function GET(request: Request) {
     const secretKey = searchParams.get("key");
 
     // Simple API key protection
-    if (secretKey !== process.env.CRON_SECRET_KEY) {
+    if (secretKey !== process.env.NEXT_PUBLIC_CRON_SECRET_KEY) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
