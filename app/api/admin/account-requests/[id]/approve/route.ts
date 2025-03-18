@@ -12,9 +12,14 @@ export async function POST(
   try {
     const userId = params.id;
 
-    // Get user details for email before updating
+    // Get user details before updating
     const user = await db
-      .select()
+      .select({
+        id: users.id,
+        email: users.email,
+        fullName: users.fullName,
+        role: users.role,
+      })
       .from(users)
       .where(eq(users.id, userId))
       .limit(1);
@@ -23,11 +28,23 @@ export async function POST(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Update user status to APPROVED
+    // Log before update
+    console.log("[APPROVE/ROUTE.TS] Before update:", user[0]);
+
+    // Update user status to APPROVED and role to ADMIN
     await db
       .update(users)
-      .set({ status: "APPROVED" })
+      .set({ status: "APPROVED", role: "ADMIN" })
       .where(eq(users.id, userId));
+
+    // Fetch user after update to confirm changes
+    const updatedUser = await db
+      .select({ id: users.id, status: users.status, role: users.role })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    console.log("[APPROVE/ROUTE.TS]✅ After update:", updatedUser[0]);
 
     // Send approval email
     await sendEmail({
@@ -38,11 +55,11 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      message: "Account approved and email sent",
+      message: "Account approved, role updated, and email sent",
       userId: userId,
     });
   } catch (error) {
-    console.error("Error approving account request:", error);
+    console.error("❌ Error approving account request:", error);
     return NextResponse.json(
       { error: "Failed to approve account", details: String(error) },
       { status: 500 },

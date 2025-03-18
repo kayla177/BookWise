@@ -7,8 +7,8 @@ import config from "@/lib/config";
 import { AccountRequestModal } from "@/components/admin/modals/AccountRequestModal";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
-import { accountRequestsDev2 } from "@/constants";
 import AccountRequestCard from "@/components/admin/AccountRequestCard";
+import { approveAdminRequest, denyAdminRequest } from "@/lib/actions/user";
 
 interface User {
   id: string;
@@ -17,6 +17,8 @@ interface User {
   universityId: number;
   universityCard: string;
   dateJoined: string;
+  status: string;
+  role: string;
 }
 
 const Page = () => {
@@ -24,6 +26,7 @@ const Page = () => {
   const [isDenyModalOpen, setIsDenyModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [pendingUsers, setPendingUsers] = useState<User[]>([]);
+  const [pendingAdminUsers, setPendingAdminUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewingCard, setViewingCard] = useState<{
@@ -63,9 +66,31 @@ const Page = () => {
         universityId: user.universityId,
         universityCard: user.universityCard,
         dateJoined: user.createdAt,
+        status: user.status,
+        role: user.role,
       }));
 
-      setPendingUsers(formattedUsers);
+      // Filter users based on status and role
+      // - Pending account approval: status is PENDING and role is not ADMIN
+      // - Pending admin requests: status is PENDING and user has made request through our feature
+      //   (we'll need to distinguish them. For now, let's also check requested admin)
+
+      // Filter for first-time account requests
+      const newAccountRequests = formattedUsers.filter(
+        (user: User) =>
+          user.status === "PENDING" && user.role !== "ADMIN" && !user.role,
+      );
+
+      // Filter for admin requests - these are approved users requesting admin access
+      const adminRequests = formattedUsers.filter(
+        (user: User) => user.status === "PENDING" && user.role === "USER",
+      );
+
+      console.log("New account requests:", newAccountRequests);
+      console.log("Admin requests:", adminRequests);
+
+      setPendingUsers(newAccountRequests);
+      setPendingAdminUsers(adminRequests);
 
       // Set total pages based on headers or response data
       if (response.headers.get("X-Total-Pages")) {
@@ -78,9 +103,8 @@ const Page = () => {
       );
 
       // For development, add some sample data if the API fails
-      if (process.env.NODE_ENV === "development") {
-        setPendingUsers(accountRequestsDev2);
-      }
+      setPendingUsers([]);
+      setPendingAdminUsers([]);
     } finally {
       setLoading(false);
     }
@@ -205,7 +229,7 @@ const Page = () => {
     );
   }
 
-  if (error && pendingUsers.length === 0) {
+  if (error && pendingUsers.length === 0 && pendingAdminUsers.length === 0) {
     return (
       <section className="w-full rounded-2xl bg-white p-7">
         <div className="flex justify-center flex-col items-center h-64">
@@ -221,41 +245,45 @@ const Page = () => {
       publicKey={config.env.imagekit.publicKey}
       urlEndpoint={config.env.imagekit.urlEndpoint}
     >
-      <section className="w-full rounded-2xl bg-white p-7">
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
-          <h2 className="text-xl font-semibold">
-            Account Registration Requests
-          </h2>
-          <div className="flex items-center gap-2">
-            <button
-              className="p-2 bg-light-800 rounded-md"
-              onClick={toggleSortOrder}
-              title={sortOrder === "desc" ? "Sort by oldest" : "Sort by newest"}
-            >
-              <ArrowUpDown size={20} className="text-gray-500" />
-            </button>
-            <div id="pagination" className="flex-shrink-0">
-              <Button
-                className="pagination-btn_light"
-                size="icon"
-                onClick={goToPreviousPage}
-                disabled={currentPage === 1}
+      <section className="w-full rounded-2xl bg-white p-7 space-y-10">
+        {/* Admin Access Requests Section */}
+        <div>
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
+            <h2 className="text-xl font-semibold">Admin Access Requests</h2>
+            <div className="flex items-center gap-2">
+              <button
+                className="p-2 bg-light-800 rounded-md"
+                onClick={toggleSortOrder}
+                title={
+                  sortOrder === "desc" ? "Sort by oldest" : "Sort by newest"
+                }
               >
-                <ChevronLeft size={16} className="text-gray-700" />
-              </Button>
-              <p className="bg-primary-admin text-white">{currentPage}</p>
-              <Button
-                className="pagination-btn_light"
-                size="icon"
-                onClick={goToNextPage}
-                disabled={currentPage === totalPages}
-              >
-                <ChevronRight size={16} className="text-gray-700" />
-              </Button>
+                <ArrowUpDown size={20} className="text-gray-500" />
+              </button>
+              <div id="pagination" className="flex-shrink-0">
+                <Button
+                  className="pagination-btn_light"
+                  size="icon"
+                  onClick={goToPreviousPage}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft size={16} className="text-gray-700" />
+                </Button>
+                <p className="bg-primary-admin text-white">{currentPage}</p>
+                <Button
+                  className="pagination-btn_light"
+                  size="icon"
+                  onClick={goToNextPage}
+                  disabled={currentPage === totalPages}
+                >
+                  <ChevronRight size={16} className="text-gray-700" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
 
+        {/* Regular Account Requests Section */}
         {pendingUsers.length === 0 ? (
           <div className="bg-light-700 rounded-lg p-8 text-center">
             <p className="text-gray-600">

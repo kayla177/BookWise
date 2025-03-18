@@ -293,15 +293,14 @@ const AdminDashboard = () => {
             <div className="border border-gray-100 rounded-lg p-8 flex flex-col items-center">
               <div className="bg-gray-50 p-6 rounded-full mb-4">
                 <Image
-                  src="/images/empty-requests.png"
-                  alt="No Requests"
-                  width={80}
-                  height={80}
-                  className="opacity-40"
+                  src="/images/no-borrow-request.png"
+                  alt="No Borrow Requests"
+                  width={250}
+                  height={250}
                 />
               </div>
               <h3 className="text-lg font-medium mb-2">
-                No Pending Book Requests
+                No Pending Borrow Requests
               </h3>
               <p className="text-gray-500 text-center">
                 There are no borrow book requests awaiting your review at this
@@ -459,11 +458,10 @@ const AdminDashboard = () => {
               <div className="border border-gray-100 rounded-lg p-8 flex flex-col items-center">
                 <div className="bg-gray-50 p-6 rounded-full mb-4">
                   <Image
-                    src="/images/empty-requests.png"
+                    src="/icons/admin/no-account-request.png"
                     alt="No Requests"
-                    width={80}
-                    height={80}
-                    className="opacity-40"
+                    width={200}
+                    height={150}
                   />
                 </div>
                 <h3 className="text-lg font-medium mb-2">

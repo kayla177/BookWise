@@ -95,6 +95,7 @@
 // };
 // export default Page;
 
+// app/(root)/my-profile/page.tsx
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { auth, signOut } from "@/auth";
@@ -103,6 +104,7 @@ import { db } from "@/database/drizzle";
 import { desc, eq } from "drizzle-orm";
 import BorrowBookList from "@/components/BorrowBookList";
 import ProfileCard from "@/components/ProfileCard";
+import AdminRequest from "@/components/AdminRequest";
 
 const Page = async () => {
   const session = await auth();
@@ -113,6 +115,8 @@ const Page = async () => {
       email: users.email,
       universityId: users.universityId,
       universityCard: users.universityCard,
+      status: users.status,
+      role: users.role,
     })
     .from(users)
     .where(eq(users.id, session?.user?.id))
@@ -161,12 +165,22 @@ const Page = async () => {
     (record) => record.status === "RETURNED",
   );
 
+  console.log("User data:", user[0]); // Log to verify
+
   return (
     <>
       <div className="flex flex-col md:flex-row gap-10">
         {/* Profile Card Section */}
         <div className="md:w-1/3">
           <ProfileCard user={user[0]} session={session} />
+
+          {/* Admin Request Component */}
+          <AdminRequest
+            userId={user[0].id}
+            currentStatus={user[0].status}
+            currentRole={user[0].role}
+          />
+
           <form
             action={async () => {
               "use server";
