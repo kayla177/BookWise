@@ -311,6 +311,7 @@
         --chart-5: 27 87% 67%;
         --radius: 0.5rem;
     }
+
     .dark {
         --background: 222.2 84% 4.9%;
         --foreground: 210 40% 98%;
@@ -340,12 +341,83 @@
 }
 
 
-
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+    * {
+        @apply border-border outline-ring/50;
     }
-  body {
-    @apply bg-background text-foreground;
+
+    body {
+        @apply bg-background text-foreground;
+    }
+}
+
+
+/* Print styles for receipt */
+@media print {
+    /* Hide everything except the receipt when printing */
+    body * {
+        visibility: hidden;
+    }
+
+    /* Only show the receipt content */
+    #receipt-container,
+    #receipt-container * {
+        visibility: visible;
+    }
+
+    /* Position the receipt at the top of the printed page */
+    #receipt-container {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: 400px;
+    }
+
+    /* Hide buttons and navigation when printing */
+    button,
+    .no-print {
+        display: none !important;
+    }
+
+    /* Ensure background colors and images print */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* Ensure dark backgrounds print properly */
+    .bg-dark-800 {
+        background-color: #1e293b !important;
+        color: white !important;
+    }
+
+    .bg-dark-700\/50 {
+        background-color: rgba(30, 41, 59, 0.7) !important;
+    }
+
+    /* Make text appropriately visible */
+    .text-white {
+        color: #ffffff !important;
+    }
+
+    .text-amber-300 {
+        color: #fcd34d !important;
+    }
+
+    .text-gray-400 {
+        color: #9ca3af !important;
+    }
+
+    .text-blue-300 {
+        color: #93c5fd !important;
+    }
+
+    /* Adjust page margins */
+    @page {
+        margin: 0;
+        size: A4 portrait;
     }
 }
