@@ -1,77 +1,94 @@
-import { NextResponse } from "next/server";
-import { db } from "@/database/drizzle";
-import { users } from "@/database/schema";
-import { eq } from "drizzle-orm";
+// simulate-inactive.ts
+import { neon } from "@neondatabase/serverless";
+import { config } from "dotenv";
 
-/**
- * This is a helper API to simulate a user being inactive for testing purposes
- * It allows you to set a user's lastActivityDate to a specified number of days ago
- *
- * Example usage:
- * /api/test/simulate-inactive?userId=YOUR_USER_ID&days=5
- */
-export async function GET(request: Request) {
+// Load environment variables
+config({ path: ".env.local" });
+
+// Get user ID and days from command line arguments
+const userId = process.argv[2];
+const days = parseInt(process.argv[3] || "3");
+
+if (!userId) {
+  console.error("Please provide a user ID as the first argument.");
+  console.error("Usage: ts-node simulate-inactive.ts <userId> [days=3]");
+  process.exit(1);
+}
+
+async function simulateInactiveUser(userId: string, days: number) {
   try {
-    // Parse URL parameters
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId");
-    const days = parseInt(searchParams.get("days") || "5");
+    console.log(`Simulating user ${userId} as inactive for ${days} days...`);
 
-    // Validate parameters
-    if (!userId) {
-      return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 },
-      );
+    // Get the database URL from environment variables
+    const databaseUrl = process.env.DATABASE_URL;
+
+    if (!databaseUrl) {
+      throw new Error("DATABASE_URL not found in environment variables");
     }
 
-    if (isNaN(days) || days < 0) {
-      return NextResponse.json(
-        { error: "Days must be a positive number" },
-        { status: 400 },
-      );
-    }
+    // Connect to the database
+    const sql = neon(databaseUrl);
 
     // Calculate the past date
     const pastDate = new Date();
     pastDate.setDate(pastDate.getDate() - days);
-
     const pastDateStr = pastDate.toISOString().split("T")[0]; // Format as YYYY-MM-DD
 
+    // First check if the user exists
+    const user = await sql`
+      SELECT id, full_name, email, last_activity_date, last_reminder_sent
+      FROM users
+      WHERE id = ${userId}
+    `;
+
+    if (user.length === 0) {
+      throw new Error(`User with ID ${userId} not found in the database.`);
+    }
+
+    console.log(`User found: ${user[0].full_name} (${user[0].email})`);
+    console.log(`Current last_activity_date: ${user[0].last_activity_date}`);
     console.log(
-      `[SIMULATE_INACTIVE] Setting user ${userId} lastActivityDate to ${pastDateStr} (${days} days ago)`,
+      `Current last_reminder_sent: ${user[0].last_reminder_sent || "null"}`,
     );
 
-    // Update the user's lastActivityDate
-    await db
-      .update(users)
-      .set({
-        lastActivityDate: pastDateStr,
-      })
-      .where(eq(users.id, userId));
+    // Update the user's last_activity_date and reset last_reminder_sent
+    await sql`
+      UPDATE users
+      SET 
+        last_activity_date = ${pastDateStr},
+        last_reminder_sent = NULL
+      WHERE id = ${userId}
+    `;
 
-    // Get updated user data
-    const updatedUser = await db
-      .select({
-        id: users.id,
-        fullName: users.fullName,
-        email: users.email,
-        lastActivityDate: users.lastActivityDate,
-      })
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
+    // Verify the update
+    const updatedUser = await sql`
+      SELECT id, full_name, email, last_activity_date, last_reminder_sent
+      FROM users
+      WHERE id = ${userId}
+    `;
 
-    return NextResponse.json({
-      success: true,
-      message: `User's last activity date set to ${days} days ago`,
-      user: updatedUser[0],
-    });
+    console.log("\nUpdate successful:");
+    console.log(`User: ${updatedUser[0].full_name} (${updatedUser[0].email})`);
+    console.log(
+      `New last_activity_date: ${updatedUser[0].last_activity_date} (${days} days ago)`,
+    );
+    console.log(
+      `New last_reminder_sent: ${updatedUser[0].last_reminder_sent || "null"}`,
+    );
+
+    console.log("\nUser is now set up to receive an inactivity reminder.");
   } catch (error) {
-    console.error("Error setting inactive user:", error);
-    return NextResponse.json(
-      { error: "Failed to set inactive user", details: String(error) },
-      { status: 500 },
-    );
+    console.error("Error simulating inactive user:", error);
   }
 }
+
+// Run the function
+simulateInactiveUser(userId, days)
+  .then(() => {
+    console.log("Simulation completed");
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error("Simulation failed:", err);
+    process.exit(1);
+  });

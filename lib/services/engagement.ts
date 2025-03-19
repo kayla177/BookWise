@@ -2,29 +2,16 @@
 
 import { db } from "@/database/drizzle";
 import { users } from "@/database/schema";
-import { eq } from "drizzle-orm";
+import { eq, and, lt, sql } from "drizzle-orm";
 import { sendEmail } from "@/lib/workflow";
 import { renderInactivityReminderEmail } from "@/components/emails/InactivityReminderEmail";
 
-// Helper to calculate days between two dates (not exported so doesn't need to be async)
+// Helper to calculate days between two dates
 const daysBetween = (date1: Date, date2: Date): number => {
   const oneDay = 24 * 60 * 60 * 1000;
   const diffTime = Math.abs(date2.getTime() - date1.getTime());
-  return Math.round(diffTime / oneDay);
+  return Math.floor(diffTime / oneDay);
 };
-
-// Check if a user should receive an activity reminder
-export async function shouldSendActivityReminder(
-  lastActivityDate: Date | null,
-): Promise<boolean> {
-  if (!lastActivityDate) return false;
-
-  const now = new Date();
-  const daysSinceActivity = daysBetween(lastActivityDate, now);
-
-  console.log(`Days since activity: ${daysSinceActivity}`);
-  return daysSinceActivity >= 3 && daysSinceActivity <= 30;
-}
 
 // Update a user's last activity date
 export async function trackUserActivity(userId: string): Promise<void> {
@@ -44,7 +31,7 @@ export async function trackUserActivity(userId: string): Promise<void> {
   }
 }
 
-// identifies inactive users and sends them reminder emails
+// Identifies inactive users and sends them reminder emails
 export async function processUserEngagement(): Promise<{
   processed: number;
   reminded: number;
@@ -52,88 +39,98 @@ export async function processUserEngagement(): Promise<{
   console.log("[SERVICES/ENGAGEMENT] Starting user engagement processing...");
 
   try {
-    const allUsers = await db.select().from(users);
-    console.log(`[SERVICES/ENGAGEMENT] Found ${allUsers.length} users total`);
+    // Calculate date that was exactly 3 days ago (YYYY-MM-DD)
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+    const threeDaysAgoStr = threeDaysAgo.toISOString().split("T")[0];
 
-    if (allUsers.length === 0) {
-      console.log("[SERVICES/ENGAGEMENT] No users found in database!");
-      return { processed: 0, reminded: 0 };
-    }
+    console.log(
+      `[SERVICES/ENGAGEMENT] Looking for users last active on exactly: ${threeDaysAgoStr}`,
+    );
 
-    console.log(`Processing ${allUsers.length} users...`);
+    // Get today's date for checking/updating last reminder
+    const today = new Date();
+    const todayStr = today.toISOString().split("T")[0];
 
-    const now = new Date();
+    // Find users who:
+    // 1. Were last active exactly 3 days ago
+    // 2. Either:
+    //    a. Have never received a reminder (lastReminderSent is null)
+    //    b. Last reminder was sent on a different day than today
+    const inactiveUsers = await db
+      .select({
+        id: users.id,
+        fullName: users.fullName,
+        email: users.email,
+        lastActivityDate: users.lastActivityDate,
+        lastReminderSent: users.lastReminderSent,
+      })
+      .from(users)
+      .where(
+        and(
+          // Only users with lastActivityDate exactly 3 days ago (based on date, ignoring time)
+          sql`DATE(${users.lastActivityDate}) = ${threeDaysAgoStr}`,
+
+          // Either lastReminderSent is null OR lastReminderSent is not from today
+          sql`(${users.lastReminderSent} IS NULL OR DATE(${users.lastReminderSent}) <> ${todayStr})`,
+        ),
+      );
+
+    console.log(
+      `[SERVICES/ENGAGEMENT] Found ${inactiveUsers.length} users inactive for exactly 3 days`,
+    );
+
     let remindedCount = 0;
 
-    // Process each user
-    for (const user of allUsers) {
+    // Process each eligible user
+    for (const user of inactiveUsers) {
       console.log(
-        `\n[SERVICES/ENGAGEMENT]Processing user: ${user.fullName} (${user.email})`,
+        `[SERVICES/ENGAGEMENT] Processing user: ${user.fullName} (${user.email})`,
       );
 
-      // Skip users without last activity date
-      if (!user.lastActivityDate) {
+      try {
+        // Send inactivity reminder
         console.log(
-          `[SERVICES/ENGAGEMENT] Skipping user ${user.email} - no last activity date`,
-        );
-        continue;
-      }
-
-      const lastActivityDate = new Date(user.lastActivityDate);
-      const daysSinceActivity = daysBetween(lastActivityDate, now);
-
-      console.log(
-        `[SERVICES/ENGAGEMENT] User ${user.email} last active ${daysSinceActivity} days ago (${lastActivityDate.toISOString().split("T")[0]})`,
-      );
-
-      // Users inactive for 3-30 days should receive a reminder
-      if (daysSinceActivity >= 3 && daysSinceActivity <= 30) {
-        console.log(
-          `[SERVICES/ENGAGEMENT] User ${user.email} needs an inactivity reminder`,
+          `[SERVICES/ENGAGEMENT] Sending inactivity reminder to ${user.email}`,
         );
 
-        try {
-          // Send inactivity reminder
+        const emailResult = await sendEmail({
+          email: user.email,
+          subject: "We Miss You at BookWise!",
+          renderEmail: () => renderInactivityReminderEmail(user.fullName),
+        });
+
+        if (emailResult.success) {
+          // Update lastReminderSent to current timestamp
+          await db
+            .update(users)
+            .set({ lastReminderSent: new Date() })
+            .where(eq(users.id, user.id));
+
           console.log(
-            `[SERVICES/ENGAGEMENT] Sending inactivity reminder to ${user.email}...`,
+            `[SERVICES/ENGAGEMENT] Email sent successfully to ${user.email}`,
           );
-
-          const emailResult = await sendEmail({
-            email: user.email,
-            subject: "We Miss You at BookWise!",
-            renderEmail: () => renderInactivityReminderEmail(user.fullName),
-          });
-
-          if (emailResult.success) {
-            console.log(
-              `[SERVICES/ENGAGEMENT] Email successfully sent to ${user.email}`,
-            );
-            remindedCount++;
-          } else {
-            console.error(
-              `[SERVICES/ENGAGEMENT] Failed to send email to ${user.email}:`,
-              emailResult.error,
-            );
-          }
-        } catch (error) {
+          remindedCount++;
+        } else {
           console.error(
-            `[SERVICES/ENGAGEMENT] Error sending email to ${user.email}:`,
-            error,
+            `[SERVICES/ENGAGEMENT] Failed to send email to ${user.email}:`,
+            emailResult.error,
           );
         }
-      } else {
-        console.log(
-          `[SERVICES/ENGAGEMENT] User ${user.email} is ${daysSinceActivity <= 2 ? "active" : "dormant"} (${daysSinceActivity} days)`,
+      } catch (error) {
+        console.error(
+          `[SERVICES/ENGAGEMENT] Error processing user ${user.id}:`,
+          error,
         );
       }
     }
 
     console.log(
-      `\n[SERVICES/ENGAGEMENT] Engagement processing complete: ${allUsers.length} users processed, ${remindedCount} reminders sent`,
+      `[SERVICES/ENGAGEMENT] Engagement processing complete: ${inactiveUsers.length} users processed, ${remindedCount} reminders sent`,
     );
 
     return {
-      processed: allUsers.length,
+      processed: inactiveUsers.length,
       reminded: remindedCount,
     };
   } catch (error) {

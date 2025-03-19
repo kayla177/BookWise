@@ -1,9 +1,8 @@
-// Create a new file: lib/services/dueReminders.ts
 "use server";
 
 import { db } from "@/database/drizzle";
 import { borrowRecords, books, users } from "@/database/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, lte } from "drizzle-orm";
 import { sendEmail } from "@/lib/workflow";
 import { renderDueReminderEmail } from "@/components/emails/DueReminderEmail";
 
@@ -19,11 +18,17 @@ export async function processBookDueReminders(): Promise<{
     // Get today's date in YYYY-MM-DD format
     const today = new Date().toISOString().split("T")[0];
 
-    // Query for borrowed books due today
+    console.log(
+      `[SERVICES/DUE_REMINDERS] Looking for books due on or before: ${today}`,
+    );
+
+    // Query for borrowed books that are due and have NEVER received a reminder
     const dueBorrows = await db
       .select({
         id: borrowRecords.id,
         dueDate: borrowRecords.dueDate,
+        borrowDate: borrowRecords.borrowDate,
+        reminded: borrowRecords.reminded,
         bookId: borrowRecords.bookId,
         userId: borrowRecords.userId,
         // Join book details
@@ -42,12 +47,13 @@ export async function processBookDueReminders(): Promise<{
       .where(
         and(
           eq(borrowRecords.status, "BORROWED"),
-          eq(borrowRecords.dueDate, today),
+          lte(borrowRecords.dueDate, today), // Due today or overdue
+          eq(borrowRecords.reminded, false), // Only books that have NEVER been reminded
         ),
       );
 
     console.log(
-      `[SERVICES/DUE_REMINDERS] Found ${dueBorrows.length} books due today`,
+      `[SERVICES/DUE_REMINDERS] Found ${dueBorrows.length} books due that need reminders`,
     );
 
     let remindedCount = 0;
@@ -56,7 +62,7 @@ export async function processBookDueReminders(): Promise<{
     for (const record of dueBorrows) {
       try {
         console.log(
-          `[SERVICES/DUE_REMINDERS] Sending reminder for book: ${record.book.title} to ${record.user.email}`,
+          `[SERVICES/DUE_REMINDERS] Processing reminder for book: ${record.book.title} borrowed by ${record.user.email}`,
         );
 
         // Send due reminder email
@@ -72,8 +78,14 @@ export async function processBookDueReminders(): Promise<{
         });
 
         if (emailResult.success) {
+          // Mark as reminded so we never remind about this borrow record again
+          await db
+            .update(borrowRecords)
+            .set({ reminded: true })
+            .where(eq(borrowRecords.id, record.id));
+
           console.log(
-            `[SERVICES/DUE_REMINDERS] Email successfully sent to ${record.user.email}`,
+            `[SERVICES/DUE_REMINDERS] Email successfully sent to ${record.user.email} for book "${record.book.title}"`,
           );
           remindedCount++;
         } else {
@@ -91,7 +103,7 @@ export async function processBookDueReminders(): Promise<{
     }
 
     console.log(
-      `[SERVICES/DUE_REMINDERS] Completed: ${dueBorrows.length} processed, ${remindedCount} reminded`,
+      `[SERVICES/DUE_REMINDERS] Completed: ${dueBorrows.length} books processed, ${remindedCount} reminders sent`,
     );
 
     return {

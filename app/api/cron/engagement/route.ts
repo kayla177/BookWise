@@ -41,7 +41,8 @@ export async function GET(request: Request) {
       "✅[CRON/ENGAGEMENT] Authorization passed, processing user engagement...",
     );
 
-    // Process all users' engagement
+    // Process all users' engagement - this will now only send emails
+    // to users who were last active exactly 3 days ago
     const result = await processUserEngagement();
     console.log("✅[CRON/ENGAGEMENT] Engagement processing complete:", result);
 

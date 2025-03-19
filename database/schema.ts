@@ -7,6 +7,7 @@ import {
   pgEnum,
   timestamp,
   date,
+  boolean,
 } from "drizzle-orm/pg-core";
 
 export const STATUS_ENUM = pgEnum("status", [
@@ -32,6 +33,8 @@ export const users = pgTable("users", {
   status: STATUS_ENUM("status").default("PENDING"),
   role: ROLE_ENUM("role").default("USER"),
   lastActivityDate: date("last_activity_date").defaultNow(),
+  // Field to track when the last engagement reminder was sent
+  lastReminderSent: timestamp("last_reminder_sent", { withTimezone: true }),
   createdAt: timestamp("created_at", {
     withTimezone: true,
   }).defaultNow(),
@@ -67,5 +70,7 @@ export const borrowRecords = pgTable("borrow_records", {
   dueDate: date("due_date").notNull(),
   returnDate: date("return_date"),
   status: BORROW_STATUS_ENUM("status").default("BORROWED").notNull(),
+  // Simple flag to track if a reminder has been sent for this borrow record
+  reminded: boolean("reminded").default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });

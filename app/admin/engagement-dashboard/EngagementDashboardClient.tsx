@@ -71,32 +71,6 @@ const getEngagementStatus = (days: number | string) => {
   return { status: "dormant", label: "Dormant", color: "bg-red-500" };
 };
 
-const triggerDueReminders = async () => {
-  setLoading((prev) => ({ ...prev, triggerDueReminders: true }));
-  try {
-    const response = await fetch(`/api/cron/due-reminders?key=${cronKey}`, {
-      method: "GET",
-    });
-    const result = await response.json();
-
-    if (result.success) {
-      toast.success("Due reminders check completed", {
-        description: `Processed ${result.processed} books, reminded ${result.reminded} users`,
-      });
-    } else {
-      toast.error("Error triggering due reminders", {
-        description: result.error || "Unknown error occurred",
-      });
-    }
-  } catch (error) {
-    toast.error("Error triggering due reminders", {
-      description: String(error),
-    });
-  } finally {
-    setLoading((prev) => ({ ...prev, triggerDueReminders: false }));
-  }
-};
-
 type User = {
   id: string;
   fullName: string;
@@ -116,8 +90,6 @@ export default function EngagementDashboardClient({
   userData,
 }: DashboardClientProps) {
   const [users, setUsers] = useState<User[]>(userData.users || []);
-  console.log("Users in EngagementDashboardClient state:", users);
-
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [localStorageData, setLocalStorageData] = useState<
     Record<string, string>
@@ -127,8 +99,10 @@ export default function EngagementDashboardClient({
   );
   const [loading, setLoading] = useState({
     triggerCron: false,
+    triggerDueReminders: false,
     simulateActivity: false,
     simulateInactivity: false,
+    simulateOverdue: false,
     resetActivity: false,
     welcome: false,
     inactivity: false,
@@ -138,6 +112,10 @@ export default function EngagementDashboardClient({
     "due-reminder": false,
     return: false,
   });
+
+  const [overdueBookId, setOverdueBookId] = useState("");
+  const [overdueUserId, setOverdueUserId] = useState("");
+  const [overdueResponse, setOverdueResponse] = useState<any>(null);
 
   // Load localStorage data
   useEffect(() => {
@@ -187,6 +165,71 @@ export default function EngagementDashboardClient({
       });
     } finally {
       setLoading((prev) => ({ ...prev, triggerCron: false }));
+    }
+  };
+
+  // Trigger due book reminders check
+  const triggerDueReminders = async () => {
+    setLoading((prev) => ({ ...prev, triggerDueReminders: true }));
+    try {
+      const response = await fetch(`/api/cron/due-reminders?key=${cronKey}`, {
+        method: "GET",
+      });
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success("Due reminders check completed", {
+          description: `Processed ${result.processed} books, reminded ${result.reminded} users`,
+        });
+      } else {
+        toast.error("Error triggering due reminders", {
+          description: result.error || "Unknown error occurred",
+        });
+      }
+    } catch (error) {
+      toast.error("Error triggering due reminders", {
+        description: String(error),
+      });
+    } finally {
+      setLoading((prev) => ({ ...prev, triggerDueReminders: false }));
+    }
+  };
+
+  // Simulate overdue book
+  const simulateOverdueBook = async () => {
+    if (!overdueUserId || !overdueBookId) {
+      toast.error("Both User ID and Book ID are required");
+      return;
+    }
+
+    setLoading((prev) => ({ ...prev, simulateOverdue: true }));
+
+    try {
+      const response = await fetch(
+        `/api/test/simulate-overdue?userId=${overdueUserId}&bookId=${overdueBookId}`,
+        {
+          method: "GET",
+        },
+      );
+      const result = await response.json();
+
+      setOverdueResponse(result);
+
+      if (result.success) {
+        toast.success("Book set as overdue", {
+          description: "Book has been marked as overdue for testing",
+        });
+      } else {
+        toast.error("Error simulating overdue book", {
+          description: result.error || "Unknown error occurred",
+        });
+      }
+    } catch (error) {
+      toast.error("Error simulating overdue book", {
+        description: String(error),
+      });
+    } finally {
+      setLoading((prev) => ({ ...prev, simulateOverdue: false }));
     }
   };
 
@@ -296,12 +339,58 @@ export default function EngagementDashboardClient({
     }
   };
 
-  console.log("User Data received in EngagementDashboardClient:", userData);
+  // Simulate inactive user via API
+  const simulateInactiveUser = async (userId: string, days: number = 3) => {
+    setLoading((prev) => ({ ...prev, simulateInactivity: true }));
+
+    try {
+      const response = await fetch(
+        `/api/test/simulate-inactive?userId=${userId}&days=${days}`,
+        {
+          method: "GET",
+        },
+      );
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success(`User set as inactive for ${days} days`, {
+          description: "Last activity date has been updated in the database",
+        });
+      } else {
+        toast.error("Failed to set user as inactive", {
+          description: result.error || "Unknown error occurred",
+        });
+      }
+    } catch (error) {
+      toast.error("Error simulating inactive user", {
+        description: String(error),
+      });
+    } finally {
+      setLoading((prev) => ({ ...prev, simulateInactivity: false }));
+    }
+  };
+
+  // Fetch fresh user data
+  const refreshUserData = async () => {
+    try {
+      const response = await fetch("/api/admin/users");
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data);
+        toast.success("User data refreshed");
+      } else {
+        toast.error("Failed to refresh user data");
+      }
+    } catch (error) {
+      toast.error("Error refreshing user data");
+    }
+  };
 
   return (
     <Tabs defaultValue="users">
       <TabsList className="mb-4">
         <TabsTrigger value="users">Users</TabsTrigger>
+        <TabsTrigger value="overdue">Overdue Books</TabsTrigger>
         <TabsTrigger value="local-storage">LocalStorage</TabsTrigger>
         <TabsTrigger value="actions">Test Actions</TabsTrigger>
       </TabsList>
@@ -315,6 +404,12 @@ export default function EngagementDashboardClient({
             </CardDescription>
           </CardHeader>
           <CardContent>
+            <div className="flex justify-end mb-4">
+              <Button onClick={refreshUserData} variant="outline">
+                Refresh User Data
+              </Button>
+            </div>
+
             <Table>
               <TableCaption>A list of all users in the system</TableCaption>
               <TableHeader>
@@ -354,6 +449,13 @@ export default function EngagementDashboardClient({
                             onClick={() => setSelectedUser(user)}
                           >
                             Details
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => simulateInactiveUser(user.id, 3)}
+                          >
+                            Set Inactive
                           </Button>
                         </div>
                       </TableCell>
@@ -429,13 +531,23 @@ export default function EngagementDashboardClient({
 
               <div className="space-x-2">
                 <Button
-                  variant="secondary"
+                  variant="outline"
                   onClick={() => simulateActiveUser(selectedUser.id)}
                   disabled={loading.simulateActivity}
                 >
                   {loading.simulateActivity
                     ? "Processing..."
                     : "Simulate Active"}
+                </Button>
+
+                <Button
+                  variant="secondary"
+                  onClick={() => simulateInactiveUser(selectedUser.id, 3)}
+                  disabled={loading.simulateInactivity}
+                >
+                  {loading.simulateInactivity
+                    ? "Processing..."
+                    : "Set Inactive (3d)"}
                 </Button>
 
                 <Button
@@ -459,6 +571,87 @@ export default function EngagementDashboardClient({
             </CardFooter>
           </Card>
         )}
+      </TabsContent>
+
+      <TabsContent value="overdue">
+        <Card>
+          <CardHeader>
+            <CardTitle>Simulate Overdue Books</CardTitle>
+            <CardDescription>
+              Test the overdue book notification system
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 mb-6">
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  User ID
+                </label>
+                <Input
+                  placeholder="Enter user ID"
+                  value={overdueUserId}
+                  onChange={(e) => setOverdueUserId(e.target.value)}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  User who borrowed the book
+                </p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  Book ID
+                </label>
+                <Input
+                  placeholder="Enter book ID"
+                  value={overdueBookId}
+                  onChange={(e) => setOverdueBookId(e.target.value)}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Book to mark as overdue
+                </p>
+              </div>
+            </div>
+
+            <Button
+              onClick={simulateOverdueBook}
+              disabled={loading.simulateOverdue}
+              className="w-full"
+            >
+              {loading.simulateOverdue
+                ? "Processing..."
+                : "Simulate Overdue Book"}
+            </Button>
+
+            {overdueResponse && (
+              <div className="mt-6">
+                <h3 className="font-medium mb-2">Response:</h3>
+                <div className="bg-gray-100 p-4 rounded-md overflow-x-auto">
+                  <pre className="text-xs">
+                    {JSON.stringify(overdueResponse, null, 2)}
+                  </pre>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-6">
+              <h3 className="font-medium mb-4">Test Due Reminders</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                After setting up an overdue book, you can trigger the due
+                reminders cron job to test email notifications:
+              </p>
+
+              <Button
+                onClick={triggerDueReminders}
+                disabled={loading.triggerDueReminders}
+                className="w-full"
+              >
+                {loading.triggerDueReminders
+                  ? "Processing..."
+                  : "Trigger Due Reminders Check"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </TabsContent>
 
       <TabsContent value="local-storage">
