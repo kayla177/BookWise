@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { IKImage } from "imagekitio-next";
-import { BorrowStatusDropdown } from "@/components/admin/BorrowStatusDropdown";
+import { BorrowStatusDropdown } from "@/components/admin/borrowRequests/BorrowStatusDropdown";
 import { Button } from "@/components/ui/button";
 
 interface BorrowRequestCardProps {

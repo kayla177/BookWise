@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { ImageKitProvider } from "imagekitio-next";
 import config from "@/lib/config";
-import BorrowReceipt from "@/components/admin/BorrowReceipt";
+import BorrowReceipt from "@/components/admin/borrowRequests/BorrowReceipt";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
 
-import BorrowRequestCard from "@/components/admin/BorrowRequestCard";
-import PrintReceipt from "@/components/admin/PrintReceipt";
+import BorrowRequestCard from "@/components/admin/borrowRequests/BorrowRequestCard";
+import PrintReceipt from "@/components/admin/borrowRequests/PrintReceipt";
+import { generateReceiptPDF } from "@/lib/utils";
 
 const Page = () => {
   const [borrowRequests, setBorrowRequests] = useState<BorrowRequest[]>([]);
@@ -162,6 +163,22 @@ const Page = () => {
     }
   };
 
+  const onPrint = useCallback(() => {
+    if (receiptData) {
+      // Try to generate and download the PDF
+      const element = document.getElementById("receipt-container");
+      if (element) {
+        generateReceiptPDF(
+          element as HTMLElement,
+          `BookWise-Receipt-${receiptData.receiptId}.pdf`,
+        );
+      } else {
+        // Fallback to browser print
+        window.print();
+      }
+    }
+  }, [receiptData]);
+
   const generateReceipt = async (requestId: string) => {
     console.log("[BOOK_REQUEST]Generating receipt for requestId:", requestId);
 
@@ -283,7 +300,6 @@ const Page = () => {
           <BorrowReceipt
             receiptData={receiptData}
             onClose={() => setShowReceipt(false)}
-            onPrint={() => <PrintReceipt receiptData={receiptData} />}
           />
         )}
       </section>

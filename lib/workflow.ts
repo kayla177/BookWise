@@ -58,7 +58,7 @@ export const sendEmail = async ({
     console.log(`Sending email via Resend...`);
     try {
       const result = await resend.emails.send({
-        from: "Kayla <contact@kayla-li.com>",
+        from: "BookWise <contact@kayla-li.com>",
         to: [email],
         subject,
         html,

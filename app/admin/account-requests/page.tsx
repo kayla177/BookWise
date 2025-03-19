@@ -7,8 +7,7 @@ import config from "@/lib/config";
 import { AccountRequestModal } from "@/components/admin/modals/AccountRequestModal";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
-import AccountRequestCard from "@/components/admin/AccountRequestCard";
-import { approveAdminRequest, denyAdminRequest } from "@/lib/actions/user";
+import AccountRequestCard from "@/components/admin/accountRequests/AccountRequestCard";
 
 interface User {
   id: string;
@@ -283,7 +282,6 @@ const Page = () => {
           </div>
         </div>
 
-        {/* Regular Account Requests Section */}
         {pendingUsers.length === 0 ? (
           <div className="bg-light-700 rounded-lg p-8 text-center">
             <p className="text-gray-600">

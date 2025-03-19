@@ -71,6 +71,32 @@ const getEngagementStatus = (days: number | string) => {
   return { status: "dormant", label: "Dormant", color: "bg-red-500" };
 };
 
+const triggerDueReminders = async () => {
+  setLoading((prev) => ({ ...prev, triggerDueReminders: true }));
+  try {
+    const response = await fetch(`/api/cron/due-reminders?key=${cronKey}`, {
+      method: "GET",
+    });
+    const result = await response.json();
+
+    if (result.success) {
+      toast.success("Due reminders check completed", {
+        description: `Processed ${result.processed} books, reminded ${result.reminded} users`,
+      });
+    } else {
+      toast.error("Error triggering due reminders", {
+        description: result.error || "Unknown error occurred",
+      });
+    }
+  } catch (error) {
+    toast.error("Error triggering due reminders", {
+      description: String(error),
+    });
+  } finally {
+    setLoading((prev) => ({ ...prev, triggerDueReminders: false }));
+  }
+};
+
 type User = {
   id: string;
   fullName: string;

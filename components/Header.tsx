@@ -59,6 +59,7 @@
 // };
 // export default Header;
 
+// Update components/Header.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -69,13 +70,14 @@ import Image from "next/image";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Session } from "next-auth";
 import { User, LogOut, ChevronDown, LayoutDashboard } from "lucide-react";
-import { signOut } from "next-auth/react";
 import { toast } from "sonner";
+import { logoutAction } from "@/lib/actions/auth-actions";
 
 const Header = ({ session }: { session: Session }) => {
   const pathname = usePathname();
   const router = useRouter();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const isAdmin = session?.user?.role === "ADMIN";
 
@@ -88,6 +90,26 @@ const Header = ({ session }: { session: Session }) => {
         description:
           "You need admin privileges to access the dashboard. Request access from your profile page.",
       });
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      setIsDropdownOpen(false);
+      toast.loading("Signing out...", { id: "logout" });
+
+      // Call the server action
+      await logoutAction();
+
+      // Redirect client-side as a fallback
+      setTimeout(() => {
+        window.location.href = "/sign-in";
+      }, 1000);
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Failed to sign out. Please try again.", { id: "logout" });
+      setIsLoggingOut(false);
     }
   };
 
@@ -178,13 +200,12 @@ const Header = ({ session }: { session: Session }) => {
               )}
 
               <button
-                onClick={async () => {
-                  await signOut({ redirect: true, callbackUrl: "/" });
-                }}
+                onClick={handleLogout}
+                disabled={isLoggingOut}
                 className="flex items-center gap-2 px-4 py-2 text-sm text-rose-400 hover:bg-dark-200 w-full text-left"
               >
                 <LogOut className="h-4 w-4" />
-                <span>Logout</span>
+                <span>{isLoggingOut ? "Signing out..." : "Logout"}</span>
               </button>
             </div>
           )}
