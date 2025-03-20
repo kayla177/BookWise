@@ -6,11 +6,8 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const secretKey = searchParams.get("key");
-
-    // Use the NEXT_PUBLIC_CRON_SECRET_KEY for validation
     const expectedKey = process.env.NEXT_PUBLIC_CRON_SECRET_KEY;
 
-    // Log for debugging
     console.log("🔑[CRON/DUE_REMINDERS] Received cron request");
 
     // Skip key validation during development if requested

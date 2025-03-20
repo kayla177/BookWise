@@ -56,7 +56,6 @@ const getEngagementStatus = (days: number | string) => {
     return { status: "unknown", label: "Unknown", color: "bg-gray-300" };
   }
 
-  // Ensure 'days' is a number
   const daysNumber = typeof days === "string" ? Number(days) : days;
 
   if (daysNumber <= 1)

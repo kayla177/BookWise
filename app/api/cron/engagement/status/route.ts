@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
 import { db } from "@/database/drizzle";
 import { users } from "@/database/schema";
+import { sql } from "drizzle-orm";
 
-/**
- * This API route checks the engagement status of all users without sending emails
- * Useful for debugging and monitoring
- *
- */
+// This API route checks the engagement status of all users without sending emails
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
