@@ -102,7 +102,7 @@
 //   },
 // });
 
-import NextAuth, { User, Session } from "next-auth";
+import NextAuth, { User } from "next-auth";
 import { compare } from "bcryptjs";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "@/database/drizzle";
@@ -114,6 +114,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   session: {
     strategy: "jwt",
   },
+
   // Defines how users can log in.
   providers: [
     CredentialsProvider({
@@ -122,7 +123,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
-        //   if the user exist, try to fetch the user from the database
+        // if the user exist, try to fetch the user from the database
         const user = await db
           .select()
           .from(users)
@@ -147,25 +148,27 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           name: user[0].fullName,
           role: user[0].role,
         } as User;
-        //  means this will follow the structure as User
       },
     }),
   ],
+
   // Overrides the default NextAuth.js sign-in page
-  // Instead of NextAuth's built-in UI, the login page is now at /sign-in.
   pages: {
     signIn: "/sign-in",
   },
+
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.email = user.email;
         token.name = user.name;
         token.role = user.role;
       }
       return token;
     },
-    async session({ session, token }): Promise<Session> {
+
+    async session({ session, token }) {
       if (session.user) {
         // Validate user still exists in DB
         const dbUser = await db

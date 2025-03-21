@@ -30,7 +30,7 @@ export const InactivityReminderEmail = ({
       </Text>
 
       <Button
-        href="https://book-store-rho-woad.vercel.app"
+        href="https://books.kayla-li.com"
         style={{
           backgroundColor: "#E7C9A5",
           color: "#1e293b",
@@ -58,5 +58,6 @@ export default InactivityReminderEmail;
 export async function renderInactivityReminderEmail(
   fullName: string,
 ): Promise<string> {
+  //    converts the JSX email template into an HTML string
   return render(<InactivityReminderEmail fullName={fullName} />);
 }

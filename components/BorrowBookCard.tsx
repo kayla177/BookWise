@@ -1,10 +1,14 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import Link from "next/link";
 import BookCover from "@/components/BookCover";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import dayjs from "dayjs";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { returnBook } from "@/lib/actions/return-book";
 
 const BorrowBookCard = ({
   id,
@@ -17,6 +21,7 @@ const BorrowBookCard = ({
   createdAt,
   book,
 }: BorrowBook) => {
+  const [isReturning, setIsReturning] = useState(false);
   const isCurrentlyBorrowed = status === "BORROWED";
 
   // Calculate days left or days since return
@@ -31,6 +36,36 @@ const BorrowBookCard = ({
 
   // Generate receipt ID using bookId and timestamp
   const receiptId = `REC-${bookId.substring(0, 4)}-${dayjs(createdAt).unix()}`;
+
+  // Handle book return
+  const handleReturnBook = async () => {
+    if (!isCurrentlyBorrowed) return;
+
+    try {
+      setIsReturning(true);
+      const result = await returnBook(id);
+
+      if (result.success) {
+        toast.success("Book returned successfully", {
+          description: "Thank you for returning the book on time!",
+        });
+
+        // Force a refresh of the page to update the UI
+        window.location.reload();
+      } else {
+        toast.error("Failed to return book", {
+          description: result.error || "Please try again later",
+        });
+      }
+    } catch (error) {
+      console.error("Error returning book:", error);
+      toast.error("An error occurred", {
+        description: "Please try again later",
+      });
+    } finally {
+      setIsReturning(false);
+    }
+  };
 
   return (
     <li className="bg-dark-200 p-5 rounded-2xl w-full xs:w-52 shadow-lg">
@@ -102,6 +137,22 @@ const BorrowBookCard = ({
           </div>
         </Link>
 
+        {isCurrentlyBorrowed && (
+          <Button
+            onClick={handleReturnBook}
+            disabled={isReturning}
+            className="mt-4 text-sm text-white font-semibold bg-green-700 hover:bg-green-800"
+          >
+            <Image
+              src="/icons/admin/calendar.svg"
+              alt="return-book"
+              height={18}
+              width={18}
+            />
+            {isReturning ? "Returning..." : "Return Book"}
+          </Button>
+        )}
+
         <Link href={`/receipts/${receiptId}`}>
           <Button className="mt-4 text-sm text-white font-semibold bg-amber-950">
             <Image
@@ -109,7 +160,7 @@ const BorrowBookCard = ({
               alt="receipt"
               width={18}
               height={18}
-              className="object-contain"
+              className="object-contain mr-1"
             />
             Download Receipt
           </Button>

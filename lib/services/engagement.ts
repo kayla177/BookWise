@@ -39,9 +39,10 @@ export async function processUserEngagement(): Promise<{
   console.log("[SERVICES/ENGAGEMENT] Starting user engagement processing...");
 
   try {
-    // Calculate date that was exactly 3 days ago (YYYY-MM-DD)
+    // Calculate date that was 3 days ago (YYYY-MM-DD)
     const threeDaysAgo = new Date();
     threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+    // "2025-03-17T14:30:00.000Z"
     const threeDaysAgoStr = threeDaysAgo.toISOString().split("T")[0];
 
     console.log(
@@ -68,7 +69,6 @@ export async function processUserEngagement(): Promise<{
       .from(users)
       .where(
         and(
-          // Only users with lastActivityDate exactly 3 days ago (based on date, ignoring time)
           sql`DATE(${users.lastActivityDate}) = ${threeDaysAgoStr}`,
 
           // Either lastReminderSent is null OR lastReminderSent is not from today
