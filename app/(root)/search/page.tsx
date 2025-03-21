@@ -14,7 +14,7 @@ const Page = () => {
   const [latestBooks, setLatestBooks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Fetch latest books when the page loads
+  // Fetch latest books when the page loads
   useEffect(() => {
     const fetchLatestBooks = async () => {
       setLoading(true);
@@ -43,7 +43,7 @@ const Page = () => {
           <span className="text-light-200">Any Book</span> In Our Library
         </h3>
 
-        {/* ✅ Pass query state to SearchForm */}
+        {/* Pass query state to SearchForm */}
         <SearchForm
           query={query}
           setQuery={setQuery}
@@ -60,7 +60,7 @@ const Page = () => {
             containerClassName="mt-28"
           />
         ) : (
-          // **Empty State UI**
+          // Empty State UI
           <div className="flex flex-col items-center mt-20">
             <Image
               src="/images/no-books.png"
@@ -78,9 +78,9 @@ const Page = () => {
             </p>
             <Button
               onClick={() => {
-                setQuery(""); // ✅ Reset query
-                setSearchResults([]); // ✅ Clear search results
-                router.replace("/search"); // ✅ Redirect without history
+                setQuery("");
+                setSearchResults([]);
+                router.replace("/search");
               }}
               className="mt-5 px-6 py-3 bg-amber-300 text-dark-800 font-bold rounded-lg"
             >

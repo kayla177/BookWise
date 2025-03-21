@@ -23,9 +23,9 @@ export async function trackUserActivity(userId: string): Promise<void> {
       .set({ lastActivityDate: today })
       .where(eq(users.id, userId));
 
-    console.log(
-      `[SERVICES/ENGAGEMENT] User ${userId} activity tracked on ${today}`,
-    );
+    // console.log(
+    //   `[SERVICES/ENGAGEMENT] User ${userId} activity tracked on ${today}`,
+    // );
   } catch (error) {
     console.error(`Error updating activity for user ${userId}:`, error);
   }
@@ -36,7 +36,7 @@ export async function processUserEngagement(): Promise<{
   processed: number;
   reminded: number;
 }> {
-  console.log("[SERVICES/ENGAGEMENT] Starting user engagement processing...");
+  // console.log("[SERVICES/ENGAGEMENT] Starting user engagement processing...");
 
   try {
     // Calculate date that was 3 days ago (YYYY-MM-DD)
@@ -44,10 +44,6 @@ export async function processUserEngagement(): Promise<{
     threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
     // "2025-03-17T14:30:00.000Z"
     const threeDaysAgoStr = threeDaysAgo.toISOString().split("T")[0];
-
-    console.log(
-      `[SERVICES/ENGAGEMENT] Looking for users last active on exactly: ${threeDaysAgoStr}`,
-    );
 
     // Get today's date for checking/updating last reminder
     const today = new Date();
@@ -76,23 +72,23 @@ export async function processUserEngagement(): Promise<{
         ),
       );
 
-    console.log(
-      `[SERVICES/ENGAGEMENT] Found ${inactiveUsers.length} users inactive for exactly 3 days`,
-    );
+    // console.log(
+    //   `[SERVICES/ENGAGEMENT] Found ${inactiveUsers.length} users inactive for exactly 3 days`,
+    // );
 
     let remindedCount = 0;
 
     // Process each eligible user
     for (const user of inactiveUsers) {
-      console.log(
-        `[SERVICES/ENGAGEMENT] Processing user: ${user.fullName} (${user.email})`,
-      );
+      // console.log(
+      //   `[SERVICES/ENGAGEMENT] Processing user: ${user.fullName} (${user.email})`,
+      // );
 
       try {
         // Send inactivity reminder
-        console.log(
-          `[SERVICES/ENGAGEMENT] Sending inactivity reminder to ${user.email}`,
-        );
+        // console.log(
+        //   `[SERVICES/ENGAGEMENT] Sending inactivity reminder to ${user.email}`,
+        // );
 
         const emailResult = await sendEmail({
           email: user.email,
@@ -107,9 +103,9 @@ export async function processUserEngagement(): Promise<{
             .set({ lastReminderSent: new Date() })
             .where(eq(users.id, user.id));
 
-          console.log(
-            `[SERVICES/ENGAGEMENT] Email sent successfully to ${user.email}`,
-          );
+          // console.log(
+          //   `[SERVICES/ENGAGEMENT] Email sent successfully to ${user.email}`,
+          // );
           remindedCount++;
         } else {
           console.error(
@@ -125,9 +121,9 @@ export async function processUserEngagement(): Promise<{
       }
     }
 
-    console.log(
-      `[SERVICES/ENGAGEMENT] Engagement processing complete: ${inactiveUsers.length} users processed, ${remindedCount} reminders sent`,
-    );
+    // console.log(
+    //   `[SERVICES/ENGAGEMENT] Engagement processing complete: ${inactiveUsers.length} users processed, ${remindedCount} reminders sent`,
+    // );
 
     return {
       processed: inactiveUsers.length,

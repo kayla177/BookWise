@@ -10,17 +10,17 @@ export async function processBookDueReminders(): Promise<{
   processed: number;
   reminded: number;
 }> {
-  console.log(
-    "[SERVICES/DUE_REMINDERS] Starting due book reminders process...",
-  );
+  // console.log(
+  //   "[SERVICES/DUE_REMINDERS] Starting due book reminders process...",
+  // );
 
   try {
     // Get today's date in YYYY-MM-DD format
     const today = new Date().toISOString().split("T")[0];
 
-    console.log(
-      `[SERVICES/DUE_REMINDERS] Looking for books due on or before: ${today}`,
-    );
+    // console.log(
+    //   `[SERVICES/DUE_REMINDERS] Looking for books due on or before: ${today}`,
+    // );
 
     // Query for borrowed books that are due and have NEVER received a reminder
     const dueBorrows = await db
@@ -52,18 +52,18 @@ export async function processBookDueReminders(): Promise<{
         ),
       );
 
-    console.log(
-      `[SERVICES/DUE_REMINDERS] Found ${dueBorrows.length} books due that need reminders`,
-    );
+    // console.log(
+    //   `[SERVICES/DUE_REMINDERS] Found ${dueBorrows.length} books due that need reminders`,
+    // );
 
     let remindedCount = 0;
 
     // Send reminders for each due book
     for (const record of dueBorrows) {
       try {
-        console.log(
-          `[SERVICES/DUE_REMINDERS] Processing reminder for book: ${record.book.title} borrowed by ${record.user.email}`,
-        );
+        // console.log(
+        //   `[SERVICES/DUE_REMINDERS] Processing reminder for book: ${record.book.title} borrowed by ${record.user.email}`,
+        // );
 
         // Send due reminder email
         const emailResult = await sendEmail({
@@ -84,9 +84,9 @@ export async function processBookDueReminders(): Promise<{
             .set({ reminded: true })
             .where(eq(borrowRecords.id, record.id));
 
-          console.log(
-            `[SERVICES/DUE_REMINDERS] Email successfully sent to ${record.user.email} for book "${record.book.title}"`,
-          );
+          // console.log(
+          //   `[SERVICES/DUE_REMINDERS] Email successfully sent to ${record.user.email} for book "${record.book.title}"`,
+          // );
           remindedCount++;
         } else {
           console.error(
@@ -102,9 +102,9 @@ export async function processBookDueReminders(): Promise<{
       }
     }
 
-    console.log(
-      `[SERVICES/DUE_REMINDERS] Completed: ${dueBorrows.length} books processed, ${remindedCount} reminders sent`,
-    );
+    // console.log(
+    //   `[SERVICES/DUE_REMINDERS] Completed: ${dueBorrows.length} books processed, ${remindedCount} reminders sent`,
+    // );
 
     return {
       processed: dueBorrows.length,

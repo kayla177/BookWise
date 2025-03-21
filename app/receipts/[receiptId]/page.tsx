@@ -1,7 +1,6 @@
-// app/receipts/[receiptId]/page.tsx
 import { redirect } from "next/navigation";
 import { db } from "@/database/drizzle";
-import { borrowRecords, books, users } from "@/database/schema";
+import { borrowRecords, books } from "@/database/schema";
 import { eq } from "drizzle-orm";
 import Receipt from "@/components/Receipt";
 import dayjs from "dayjs";

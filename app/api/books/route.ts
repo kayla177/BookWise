@@ -1,27 +1,3 @@
-// import { NextResponse } from "next/server";
-// import { db } from "@/database/drizzle";
-// import { books } from "@/database/schema";
-// import { desc } from "drizzle-orm";
-//
-// export async function GET() {
-//   try {
-//     const latestBooks = await db
-//       .select()
-//       .from(books)
-//       .orderBy(desc(books.createdAt))
-//       .limit(10);
-//
-//     return NextResponse.json(latestBooks);
-//   } catch (error) {
-//     console.error("Error fetching books:", error);
-//     return NextResponse.json(
-//       { error: "Failed to fetch books" },
-//       { status: 500 },
-//     );
-//   }
-// }
-//
-
 import { NextResponse } from "next/server";
 import { db } from "@/database/drizzle";
 import { books } from "@/database/schema";
@@ -35,7 +11,6 @@ export async function GET(req: Request) {
     let bookList;
 
     if (query) {
-      // 🔍 Ensure `coverColor` is included in search results
       bookList = await db
         .select({
           id: books.id,
@@ -51,7 +26,7 @@ export async function GET(req: Request) {
         .orderBy(desc(books.createdAt))
         .limit(10);
     } else {
-      // 📚 Fetch latest books (for homepage & admin panel)
+      // Fetch latest books (for homepage & admin panel)
       bookList = await db
         .select({
           id: books.id,
