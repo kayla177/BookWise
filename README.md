@@ -5,10 +5,10 @@ A modern library management system built with Next.js, TypeScript, and PostgreSQ
 ## Overview
 
 BookWise is a library management platform that allows users to browse books, borrow and return items, and receive digital receipts. Administrators can manage the collection, approve borrowing requests, and oversee user access.
+**Live Preview:** [books.kayla-li.com](https://books.kayla-li.com)
 ![BookWise Screenshot](public/images/BookWise_HomePage.png)
 ![BookWise Screenshot](public/images/BookWise_AdminPage.png)
 
-**Live Preview:** [books.kayla-li.com](https://books.kayla-li.com)
 
 > **Note:** To view the admin dashboard, please go to the my-profile page to request admin access. I will approve it asap!
 
