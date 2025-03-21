@@ -3,7 +3,7 @@ import { db } from "@/database/drizzle";
 import { users } from "@/database/schema";
 import { eq, desc, asc } from "drizzle-orm";
 
-// Get all pending account requests
+// Get all pending account requests (admin requests)
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -18,6 +18,7 @@ export async function GET(request: Request) {
         universityCard: users.universityCard,
         createdAt: users.createdAt,
         status: users.status,
+        role: users.role,
       })
       .from(users)
       .where(eq(users.status, "PENDING"))

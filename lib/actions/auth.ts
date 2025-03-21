@@ -269,7 +269,6 @@ export const signInWithCredentials = async (
   }
 };
 
-// Sign up
 export const signUp = async (params: AuthCredentials) => {
   const { fullName, email, password, universityCard, universityId } = params;
 
@@ -293,13 +292,14 @@ export const signUp = async (params: AuthCredentials) => {
   const hashedPassword = await hash(password, 10);
 
   try {
-    // create user
     await db.insert(users).values({
       fullName,
       email,
       universityId,
       password: hashedPassword,
       universityCard,
+      status: "ACTIVE",
+      role: "USER",
     });
 
     // Send Welcome Email

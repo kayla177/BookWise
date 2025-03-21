@@ -9,6 +9,7 @@ import { eq } from "drizzle-orm";
  * @param userId The user's ID
  * @returns Success or error response
  */
+// In lib/actions/user.ts
 export async function requestAdminAccess(userId: string) {
   try {
     // First check if the user exists
@@ -60,35 +61,6 @@ export async function requestAdminAccess(userId: string) {
   }
 }
 
-/**
- * Approves a user's admin request
- * @param userId The user's ID
- * @returns Success or error response
- */
-// export async function approveAdminRequest(userId: string) {
-//   try {
-//     // Update the user's role to ADMIN and clear the pending status
-//     await db
-//       .update(users)
-//       .set({
-//         role: "ADMIN",
-//         status: "APPROVED",
-//       })
-//       .where(eq(users.id, userId));
-//
-//     return {
-//       success: true,
-//       message: "Admin request approved successfully",
-//     };
-//   } catch (error) {
-//     console.error("Error approving admin request:", error);
-//     return {
-//       success: false,
-//       error: "An error occurred while approving the request",
-//     };
-//   }
-// }
-
 export async function approveAdminRequest(userId: string) {
   try {
     console.log(`Approving admin request for user ID: ${userId}`);
@@ -105,7 +77,7 @@ export async function approveAdminRequest(userId: string) {
     await db
       .update(users)
       .set({
-        role: "ADMIN", // Ensure this is correctly set
+        role: "ADMIN",
         status: "APPROVED",
       })
       .where(eq(users.id, userId));
