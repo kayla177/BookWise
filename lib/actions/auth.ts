@@ -59,7 +59,7 @@ export const requestPasswordReset = async (email: string) => {
     });
 
     // Generate reset URL
-    const resetUrl = `${config.env.apiEndpoint}/reset-password/${token}`;
+    const resetUrl = `${config.env.prodApiEndpoint}/reset-password/${token}`;
 
     // Send the email
     await sendEmail({

@@ -86,7 +86,7 @@ export const borrowBook = async (params: BorrowBookParams) => {
     const receiptId = `REC-${bookId.substring(0, 4)}-${Math.floor(Date.now() / 1000)}`;
 
     // Generate receipt URL - path to view/download the receipt
-    const receiptUrl = `${config.env.apiEndpoint}/receipts/${receiptId}`;
+    const receiptUrl = `${config.env.prodApiEndpoint}/receipts/${receiptId}`;
 
     // Send Book Borrowed Email
     await sendEmail({
