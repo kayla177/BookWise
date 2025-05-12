@@ -67,12 +67,12 @@ const ForgotPasswordPage = () => {
       <div className="flex flex-col gap-4">
         <h1 className="text-2xl font-semibold text-white">Check Your Email</h1>
         <p className="text-light-100">
-          We've sent a password reset link to your email address. Please check
-          your inbox and follow the instructions to reset your password.
+          We&apos;ve sent a password reset link to your email address. Please
+          check your inbox and follow the instructions to reset your password.
         </p>
         <p className="text-light-100 mt-2">
-          If you don't receive an email within a few minutes, please check your
-          spam folder or try again.
+          If you don&apos;t receive an email within a few minutes, please check
+          your spam folder or try again.
         </p>
         <div className="mt-4">
           <Button asChild className="w-full">
@@ -87,8 +87,8 @@ const ForgotPasswordPage = () => {
     <div className="flex flex-col gap-4">
       <h1 className="text-2xl font-semibold text-white">Reset Your Password</h1>
       <p className="text-light-100">
-        Enter your email address below, and we'll send you a link to reset your
-        password.
+        Enter your email address below, and we&apos;ll send you a link to reset
+        your password.
       </p>
 
       <Form {...form}>

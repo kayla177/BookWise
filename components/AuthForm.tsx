@@ -58,21 +58,30 @@ const AuthForm = <T extends FieldValues>({
   });
 
   // 2. Define a submit handler.
+  // In your AuthForm.tsx - update handleSubmit
   const handleSubmit: SubmitHandler<T> = async (data) => {
-    const result = await onSubmit(data);
-    console.log(result);
+    try {
+      const result = await onSubmit(data);
+      console.log("Authentication result:", result);
 
-    if (result?.success) {
-      toast.success("Success", {
-        description: isSignIn
-          ? "You have successfully signed in."
-          : "You have successfully signed up.",
-      });
+      if (result?.success) {
+        toast.success("Success", {
+          description: isSignIn
+            ? "You have successfully signed in."
+            : "You have successfully signed up.",
+        });
 
-      router.push("/");
-    } else {
-      toast.error(`Error ${isSignIn ? "Signing in" : "Signing up"}`, {
-        description: result?.error ?? "An error occurred.",
+        router.push("/");
+      } else {
+        // Display the specific error message
+        toast.error(`${isSignIn ? "Sign In" : "Sign Up"} Failed`, {
+          description: result?.error ?? "An error occurred.",
+        });
+      }
+    } catch (error) {
+      console.error("Authentication error:", error);
+      toast.error("Authentication Error", {
+        description: "An unexpected error occurred. Please try again.",
       });
     }
   };

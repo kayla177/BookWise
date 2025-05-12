@@ -113,41 +113,79 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   // Defines how user authentication sessions are stored.
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60,
   },
 
   // Defines how users can log in.
   providers: [
     CredentialsProvider({
+      // In auth.ts - update the authorize function
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
+          console.log("Missing credentials");
           return null;
         }
 
-        // if the user exist, try to fetch the user from the database
-        const user = await db
-          .select()
-          .from(users)
-          .where(eq(users.email, credentials.email.toString()))
-          .limit(1);
+        try {
+          // if the user exist, try to fetch the user from the database
+          const user = await db
+            .select()
+            .from(users)
+            .where(eq(users.email, credentials.email.toString()))
+            .limit(1);
 
-        if (user.length === 0) return null;
+          console.log(
+            "User query result:",
+            user.length > 0 ? "User found" : "User not found",
+          );
 
-        // "compare()" from bcryptjs checks if the provided password matches the hashed password
-        const isPasswordValid = await compare(
-          credentials.password.toString(),
-          user[0].password,
-        );
+          if (user.length === 0) {
+            console.log("User not found");
+            // Return an error code for email not found
+            throw new Error("email_not_found");
+          }
 
-        if (!isPasswordValid) return null;
+          // "compare()" from bcryptjs checks if the provided password matches the hashed password
+          try {
+            const isPasswordValid = await compare(
+              credentials.password.toString(),
+              user[0].password,
+            );
 
-        // if login is successful, return user's info
-        // this data is stored in the JWT session
-        return {
-          id: user[0].id.toString(),
-          email: user[0].email,
-          name: user[0].fullName,
-          role: user[0].role,
-        } as User;
+            console.log(
+              "Password validation result:",
+              isPasswordValid ? "Valid" : "Invalid",
+            );
+
+            if (!isPasswordValid) {
+              console.log("Invalid password");
+              // Return an error code for invalid password
+              throw new Error("invalid_password");
+            }
+
+            // if login is successful, return user's info
+            return {
+              id: user[0].id.toString(),
+              email: user[0].email,
+              name: user[0].fullName,
+              role: user[0].role,
+            };
+          } catch (passwordError) {
+            // Check if this is our custom error
+            if (passwordError.message === "invalid_password") {
+              throw passwordError;
+            }
+            console.error("Password comparison error:", passwordError);
+            throw new Error("authentication_error");
+          }
+        } catch (error) {
+          // Pass on our specific error messages
+          if (["email_not_found", "invalid_password"].includes(error.message)) {
+            throw error;
+          }
+          console.error("Database error in authorize:", error);
+          throw new Error("database_error");
+        }
       },
     }),
   ],

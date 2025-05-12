@@ -133,14 +133,16 @@ export const signInWithCredentials = async (
 ) => {
   const { email, password } = params;
 
-  // get the current ip address(rate limit)
-  const ip = (await headers()).get("x-forwarded-for") || "127.0.0.1";
-  // this success will let us know if we can go to that page successfully
-  const { success } = await ratelimit.limit(ip);
+  // // get the current ip address(rate limit)
+  // const ip = (await headers()).get("x-forwarded-for") || "127.0.0.1";
+  // // this success will let us know if we can go to that page successfully
+  // const { success } = await ratelimit.limit(ip);
+  //
+  // if (!success) {
+  //   return redirect("/too-fast");
+  // }
 
-  if (!success) {
-    return redirect("/too-fast");
-  }
+  console.log("Starting signin with credentials:", { email });
 
   try {
     // means that we want to use the "credentials" method to signIn
@@ -152,13 +154,14 @@ export const signInWithCredentials = async (
 
     // if there is error
     if (result?.error) {
+      console.error("Sign-in error:", result.error);
       return { success: false, error: result.error };
     }
 
     return { success: true };
   } catch (e) {
-    console.log(e, "SignIn error");
-    return { success: false, error: "SignIn error" };
+    console.error("SignIn error:", e);
+    return { success: false, error: "Authentication error. Please try again." };
   }
 };
 
