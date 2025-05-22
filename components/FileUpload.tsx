@@ -14,22 +14,47 @@ const {
   },
 } = config;
 
+// const authenticator = async () => {
+//   try {
+//     const response = await fetch(
+//       `${config.env.prodApiEndpoint}/api/auth/imagekit`,
+//     );
+//
+//     if (!response.ok) {
+//       const errorText = await response.text();
+//
+//       throw new Error(
+//         `Request failed with status ${response.status}: ${errorText}`,
+//       );
+//     }
+//
+//     const data = await response.json();
+//
+//     const { signature, expire, token } = data;
+//
+//     return { token, expire, signature };
+//   } catch (error: any) {
+//     throw new Error(`Authentication request failed: ${error.message}`);
+//   }
+// };
+
 const authenticator = async () => {
+  const baseUrl =
+    typeof window !== "undefined" && window.location.hostname === "localhost"
+      ? "http://localhost:3000"
+      : config.env.prodApiEndpoint;
+
   try {
-    const response = await fetch(
-      `${config.env.prodApiEndpoint}/api/auth/imagekit`,
-    );
+    const response = await fetch(`${baseUrl}/api/auth/imagekit`);
 
     if (!response.ok) {
       const errorText = await response.text();
-
       throw new Error(
         `Request failed with status ${response.status}: ${errorText}`,
       );
     }
 
     const data = await response.json();
-
     const { signature, expire, token } = data;
 
     return { token, expire, signature };
